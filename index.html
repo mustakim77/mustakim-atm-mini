@@ -418,8 +418,68 @@
         // UPDATE PERBAIKAN LOGIKA PENCARIAN TEKS (REGEX SUPER AGRESIF)
         // ==============================================================
         function extractDataFromText(text) {
-            // Normalisasi baris baru ganda agar tidak merusak Regex
+            // Normalisasi baris baru agar lebih mudah dibaca Regex
             const normalizedText = text.replace(/[\r\n]+/g, '\n');
+
+            // 1. NOMINAL (Menoleransi spasi/koma/titik)
+            const matchNominal = normalizedText.match(/Nominal\s*(?:Rp)?\s*([\d\.\,\s]+)/i);
+            if (matchNominal) {
+                // Hapus semua selain angka
+                document.getElementById('in-nominal').value = matchNominal[1].replace(/[^0-9]/g, '');
+            }
+
+            // 2. REFERENSI (Toleransi spasi di dalam angka referensi)
+            const matchRef = normalizedText.match(/(?:Referensi|Ref)\s*[:]?\s*\n?\s*((?:\d[\s\.\-]*){8,20})/i);
+            if (matchRef) {
+                document.getElementById('in-ref').value = matchRef[1].replace(/\D/g, '');
+            }
+
+            // 3. REKENING TUJUAN (Toleransi spasi tinggi, cari 10-20 digit angka)
+            // Rumus ini akan menangkap angka walau terpotong spasi seperti "123 456 789 0"
+            const matchRekTujuan = normalizedText.match(/(?:Nomor Tujuan|Rekening Tujuan|Ke Rekening|Nomor|Tujuan|Rek)[\s\S]{0,35}?((?:\d[\s\.\-]*){10,20})/i);
+            if (matchRekTujuan) {
+                // Bersihkan spasi/titik agar jadi angka murni
+                document.getElementById('in-tujuan-rek').value = matchRekTujuan[1].replace(/\D/g, '');
+            }
+
+            // 4. NAMA TUJUAN (Penyaringan ketat dari kata-kata tidak relevan)
+            const matchPenerima = normalizedText.match(/(?:Nama Tujuan|Nama Penerima|Penerima|Nama|Ke)\s*[:]?\s*\n\s*([A-Za-z\.\s\*]+)/i);
+            if (matchPenerima) {
+                let nama = matchPenerima[1].split('\n')[0].trim();
+                // Hapus nama bank atau kata nyasar
+                nama = nama.replace(/(BANK\s*[A-Za-z]+|Nominal|Nomor|Tujuan|Rekening)/ig, '').trim();
+                if (nama.length > 2) document.getElementById('in-tujuan-nama').value = nama;
+            }
+
+            // 5. REKENING PENGIRIM
+            const matchPengirimRek = normalizedText.match(/(?:Sumber Dana|Dari|Rekening)[\s\S]{0,35}?((?:\d[\s\.\-]*){10,20})/i);
+            if (matchPengirimRek) {
+                let rekPengirim = matchPengirimRek[1].replace(/\D/g, '');
+                // Pastikan tidak sama dengan rekening tujuan
+                if (rekPengirim !== document.getElementById('in-tujuan-rek').value) {
+                     document.getElementById('in-pengirim-rek').value = rekPengirim;
+                }
+            }
+
+            // 6. NAMA PENGIRIM
+            const matchPengirim = normalizedText.match(/(?:Sumber Dana|Dari)\s*[:]?\s*\n\s*([A-Za-z\.\s\*]+)/i);
+            if (matchPengirim) {
+                let nama = matchPengirim[1].split('\n')[0].trim();
+                nama = nama.replace(/(Nomor|Tujuan|Rekening)/ig, '').trim();
+                if (nama.length > 2) document.getElementById('in-pengirim-nama').value = nama;
+            }
+
+            // 7. BANK TUJUAN
+            const matchBank = normalizedText.match(/Bank\s*(?:Tujuan)?\s*[:]?\s*\n?\s*([A-Za-z\s]+)/i);
+            if (matchBank) {
+                let bank = matchBank[1].split('\n')[0].trim();
+                bank = bank.replace(/Nominal/ig, '').trim();
+                if (bank.length > 2) document.getElementById('in-tujuan-bank').value = bank;
+            }
+
+            // Jalankan sinkronisasi data ke pratinjau struk
+            syncPreviewData();
+        }
 
             // NOMINAL
             const matchNominal = normalizedText.match(/Nominal\s*(?:Rp)?\s*([\d\.\,]+)/i);
