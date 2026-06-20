@@ -16,8 +16,8 @@
             --bg-app: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --primary: #0284c7; /* Biru elegan */
-            --primary-hover: #0369a1;
+            --primary: #263e57; /* Warna branding khusus */
+            --primary-hover: #1a2b3d;
             --border-color: #e2e8f0;
             --card-bg: #ffffff;
             --success: #10b981;
@@ -48,13 +48,13 @@
             border-bottom-left-radius: 24px;
             border-bottom-right-radius: 24px;
             position: sticky; top: 0; z-index: 10; 
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+            box-shadow: 0 4px 12px rgba(38, 62, 87, 0.2);
         }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
         .brand-info { display: flex; align-items: center; gap: 12px; }
-        .logo-box { background: rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(5px);}
+        .logo-box { background: rgba(255,255,255,0.15); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(5px);}
         .brand-text h1 { font-size: 16px; font-weight: 700; line-height: 1.2; letter-spacing: 0.5px;}
-        .brand-text p { font-size: 12px; color: #e0f2fe; opacity: 0.9;}
+        .brand-text p { font-size: 12px; color: #cbd5e1; opacity: 0.9;}
         
         .btn-printer { background: white; color: var(--primary); font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 20px; border: none; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);}
         .btn-printer:active { transform: scale(0.96); }
@@ -66,11 +66,11 @@
         /* Kartu Upload */
         .upload-section { padding: 0 20px; margin-bottom: 15px; }
         .upload-card { background: var(--card-bg); border-radius: 20px; padding: 25px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; gap: 15px; border: 1px solid rgba(0,0,0,0.04); }
-        .upload-icon { width: 56px; height: 56px; background: #f0f9ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px;}
+        .upload-icon { width: 56px; height: 56px; background: #f1f5f9; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px;}
         
         .btn-group { display: flex; gap: 10px; width: 100%; }
         .btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);}
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(38, 62, 87, 0.2);}
         .btn-secondary { background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-main); }
         
         /* === TABS === */
@@ -88,12 +88,11 @@
         .input-wrapper { position: relative; display: flex; align-items: center; }
         .input-wrapper i { position: absolute; left: 14px; color: #94a3b8; font-size: 14px;}
         .form-group input { width: 100%; padding: 12px 14px 12px 38px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 14px; color: var(--text-main); font-weight: 500; transition: 0.2s; outline: none; background: #f8fafc;}
-        .form-group input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);}
+        .form-group input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(38, 62, 87, 0.1);}
 
         /* PREVIEW KERTAS KASIR */
         .preview-container { display: none; flex-direction: column; align-items: center; }
         .receipt-paper { background: white; width: 100%; max-width: 300px; padding: 25px 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); font-family: 'Space Mono', monospace; font-size: 12px; color: #000; border-radius: 4px; border: 1px solid #e2e8f0; position: relative;}
-        /* Efek gerigi kertas bawah */
         .receipt-paper::after { content: ""; position: absolute; bottom: -6px; left: 0; right: 0; height: 6px; background-size: 12px 12px; background-image: radial-gradient(circle at 6px 0, transparent 6px, white 6.5px); }
         
         .receipt-center { text-align: center; margin-bottom: 15px; }
@@ -262,7 +261,7 @@
         </div>
 
         <div id="page-riwayat" class="page hidden">
-            <div style="padding: 0 20px;">
+             <div style="padding: 0 20px;">
                 <h2 style="font-size: 16px; font-weight: 700; margin: 10px 0 15px 0;">Riwayat Transaksi</h2>
                 <div id="riwayat-loading" style="text-align: center; padding: 20px; color: var(--text-muted);">
                     <div class="spinner" style="margin: 0 auto 10px auto; width: 30px; height: 30px; border-width: 3px;"></div>
@@ -291,7 +290,6 @@
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/.../exec"; 
 
-        // Fungsi Format Tanggal Lengkap (Sesuai Permintaan Logika Database)
         function formatTanggalPanjang(dateObj) {
             const hariArr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             const bulanArr = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -307,7 +305,6 @@
             return `${hari}, ${tanggal} ${bulan} ${tahun} ${jam}:${menit}`;
         }
 
-        // Set Default Input Tanggal dengan Format Panjang
         document.getElementById('in-tanggal').value = formatTanggalPanjang(new Date());
 
         let toastTimer = null;
@@ -328,7 +325,7 @@
                 document.getElementById('nav-pindai').classList.add('active');
             } else if(pageName === 'riwayat') {
                 document.getElementById('nav-riwayat').classList.add('active');
-                // loadRiwayatData(); // Aktifkan jika URL Web App sudah benar
+                // loadRiwayatData(); 
             }
         }
 
@@ -375,7 +372,6 @@
             input.addEventListener('input', syncPreviewData);
         });
 
-        // === LOGIKA UPLOAD & OCR ===
         document.getElementById('kamera-input').addEventListener('change', handleImageUpload);
         document.getElementById('galeri-input').addEventListener('change', handleImageUpload);
 
@@ -419,24 +415,47 @@
             });
         }
 
+        // ==============================================================
+        // UPDATE PERBAIKAN LOGIKA PENCARIAN TEKS (REGEX)
+        // ==============================================================
         function extractDataFromText(text) {
+            // NOMINAL
             const matchNominal = text.match(/Nominal\s*(?:Rp)?\s*([\d\.]+)/i);
             if (matchNominal) document.getElementById('in-nominal').value = matchNominal[1].replace(/\./g, '');
 
+            // REFERENSI
             const matchRef = text.match(/(?:Referensi|Ref)\s*[:]?\s*(\d+)/i);
             if (matchRef) document.getElementById('in-ref').value = matchRef[1];
 
-            const matchPengirim = text.match(/(?:Sumber Dana|Dari)\s*[:]?\s*([A-Za-z\s]+)/i);
-            if (matchPengirim) document.getElementById('in-pengirim-nama').value = matchPengirim[1].trim();
-
-            const matchPenerima = text.match(/(?:Nama|Penerima|Tujuan|Ke)\s*[:]?\s*([A-Za-z\s]+)/i);
-            if (matchPenerima) document.getElementById('in-tujuan-nama').value = matchPenerima[1].trim();
-
-            const matchRekTujuan = text.match(/Rekening\s*(?:Tujuan)?\s*[:]?\s*(\d+)/i);
+            // REKENING TUJUAN: Di BRImo biasanya ditulis "Nomor Tujuan"
+            const matchRekTujuan = text.match(/(?:Rekening|Nomor Tujuan|Tujuan|Nomor)\s*[:]?\n?\s*(\d{10,16})/i);
             if (matchRekTujuan) document.getElementById('in-tujuan-rek').value = matchRekTujuan[1];
 
+            // NAMA TUJUAN
+            const matchPenerima = text.match(/(?:Nama|Penerima|Tujuan|Ke)\s*[:]?\n?\s*([A-Za-z\.\s\*]+)/i);
+            if (matchPenerima) {
+                let namaTujuan = matchPenerima[1].trim();
+                // Menghapus teks "BANK BRI", "BANK MANDIRI", dll yang tertangkap secara otomatis
+                namaTujuan = namaTujuan.replace(/BANK\s+[A-Za-z]+/ig, '').trim();
+                namaTujuan = namaTujuan.replace(/Nominal/ig, '').trim(); 
+                document.getElementById('in-tujuan-nama').value = namaTujuan;
+            }
+
+            // PENGIRIM
+            const matchPengirim = text.match(/(?:Sumber Dana|Dari)\s*[:]?\n?\s*([A-Za-z\.\s]+)/i);
+            if (matchPengirim) {
+                let namaPengirim = matchPengirim[1].trim();
+                namaPengirim = namaPengirim.replace(/(Nomor|Tujuan|Rekening)/ig, '').trim();
+                document.getElementById('in-pengirim-nama').value = namaPengirim;
+            }
+
+            // BANK TUJUAN
             const matchBank = text.match(/Bank\s*(?:Tujuan)?\s*[:]?\s*([A-Za-z\s]+)/i);
-            if (matchBank) document.getElementById('in-tujuan-bank').value = matchBank[1].trim();
+            if (matchBank) {
+                let bank = matchBank[1].trim();
+                bank = bank.replace(/Nominal/ig, '').trim();
+                document.getElementById('in-tujuan-bank').value = bank;
+            }
 
             syncPreviewData();
         }
@@ -448,7 +467,6 @@
             return kiri + " ".repeat(sisaSpasi) + kanan + "\n";
         }
 
-        // === FUNGSI CETAK PRINTER ===
         async function printReceiptBluetooth() {
             const tgl = document.getElementById('out-tanggal').innerText;
             const ref = document.getElementById('out-ref').innerText;
