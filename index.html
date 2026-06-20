@@ -16,7 +16,7 @@
             --bg-app: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --primary: #263e57; /* Warna branding khusus */
+            --primary: #263e57; /* Warna branding */
             --primary-hover: #1a2b3d;
             --border-color: #e2e8f0;
             --card-bg: #ffffff;
@@ -325,7 +325,6 @@
                 document.getElementById('nav-pindai').classList.add('active');
             } else if(pageName === 'riwayat') {
                 document.getElementById('nav-riwayat').classList.add('active');
-                // loadRiwayatData(); 
             }
         }
 
@@ -416,45 +415,59 @@
         }
 
         // ==============================================================
-        // UPDATE PERBAIKAN LOGIKA PENCARIAN TEKS (REGEX)
+        // UPDATE PERBAIKAN LOGIKA PENCARIAN TEKS (REGEX SUPER AGRESIF)
         // ==============================================================
         function extractDataFromText(text) {
+            // Normalisasi baris baru ganda agar tidak merusak Regex
+            const normalizedText = text.replace(/[\r\n]+/g, '\n');
+
             // NOMINAL
-            const matchNominal = text.match(/Nominal\s*(?:Rp)?\s*([\d\.]+)/i);
-            if (matchNominal) document.getElementById('in-nominal').value = matchNominal[1].replace(/\./g, '');
-
-            // REFERENSI
-            const matchRef = text.match(/(?:Referensi|Ref)\s*[:]?\s*(\d+)/i);
-            if (matchRef) document.getElementById('in-ref').value = matchRef[1];
-
-            // REKENING TUJUAN: Di BRImo biasanya ditulis "Nomor Tujuan"
-            const matchRekTujuan = text.match(/(?:Rekening|Nomor Tujuan|Tujuan|Nomor)\s*[:]?\n?\s*(\d{10,16})/i);
-            if (matchRekTujuan) document.getElementById('in-tujuan-rek').value = matchRekTujuan[1];
-
-            // NAMA TUJUAN
-            const matchPenerima = text.match(/(?:Nama|Penerima|Tujuan|Ke)\s*[:]?\n?\s*([A-Za-z\.\s\*]+)/i);
-            if (matchPenerima) {
-                let namaTujuan = matchPenerima[1].trim();
-                // Menghapus teks "BANK BRI", "BANK MANDIRI", dll yang tertangkap secara otomatis
-                namaTujuan = namaTujuan.replace(/BANK\s+[A-Za-z]+/ig, '').trim();
-                namaTujuan = namaTujuan.replace(/Nominal/ig, '').trim(); 
-                document.getElementById('in-tujuan-nama').value = namaTujuan;
+            const matchNominal = normalizedText.match(/Nominal\s*(?:Rp)?\s*([\d\.\,]+)/i);
+            if (matchNominal) {
+                document.getElementById('in-nominal').value = matchNominal[1].replace(/[^0-9]/g, '');
             }
 
-            // PENGIRIM
-            const matchPengirim = text.match(/(?:Sumber Dana|Dari)\s*[:]?\n?\s*([A-Za-z\.\s]+)/i);
+            // REFERENSI
+            const matchRef = normalizedText.match(/(?:Referensi|Ref)\s*[:]?\s*\n?\s*(\d{8,20})/i);
+            if (matchRef) document.getElementById('in-ref').value = matchRef[1];
+
+            // REKENING TUJUAN: Cari keyword, lalu scan hingga 30 karakter ke depan khusus untuk deretan angka
+            const matchRekTujuan = normalizedText.match(/(?:Nomor Tujuan|Rekening Tujuan|Ke Rekening|Nomor|Tujuan)[\s\S]{0,30}?(\d{10,20})/i);
+            if (matchRekTujuan) {
+                document.getElementById('in-tujuan-rek').value = matchRekTujuan[1];
+            }
+
+            // NAMA TUJUAN: Tangkap nama dan bersihkan dari kata-kata yang tidak relevan
+            const matchPenerima = normalizedText.match(/(?:Nama Tujuan|Nama Penerima|Penerima|Nama|Ke)\s*[:]?\s*\n\s*([A-Za-z\.\s\*]+)/i);
+            if (matchPenerima) {
+                let nama = matchPenerima[1].split('\n')[0].trim(); // Ambil baris pertama saja
+                nama = nama.replace(/(BANK|Nominal|Nomor|Tujuan|Rekening)/ig, '').trim();
+                if (nama) document.getElementById('in-tujuan-nama').value = nama;
+            }
+
+            // REKENING PENGIRIM
+            const matchPengirimRek = normalizedText.match(/(?:Sumber Dana|Dari|Rekening)[\s\S]{0,30}?(\d{10,20})/i);
+            if (matchPengirimRek) {
+                // Pastikan tidak mengambil angka yang sama dengan rekening tujuan
+                if (matchPengirimRek[1] !== document.getElementById('in-tujuan-rek').value) {
+                     document.getElementById('in-pengirim-rek').value = matchPengirimRek[1];
+                }
+            }
+
+            // PENGIRIM NAMA
+            const matchPengirim = normalizedText.match(/(?:Sumber Dana|Dari)\s*[:]?\s*\n\s*([A-Za-z\.\s\*]+)/i);
             if (matchPengirim) {
-                let namaPengirim = matchPengirim[1].trim();
-                namaPengirim = namaPengirim.replace(/(Nomor|Tujuan|Rekening)/ig, '').trim();
-                document.getElementById('in-pengirim-nama').value = namaPengirim;
+                let nama = matchPengirim[1].split('\n')[0].trim();
+                nama = nama.replace(/(Nomor|Tujuan|Rekening)/ig, '').trim();
+                if (nama) document.getElementById('in-pengirim-nama').value = nama;
             }
 
             // BANK TUJUAN
-            const matchBank = text.match(/Bank\s*(?:Tujuan)?\s*[:]?\s*([A-Za-z\s]+)/i);
+            const matchBank = normalizedText.match(/Bank\s*(?:Tujuan)?\s*[:]?\s*\n\s*([A-Za-z\s]+)/i);
             if (matchBank) {
-                let bank = matchBank[1].trim();
+                let bank = matchBank[1].split('\n')[0].trim();
                 bank = bank.replace(/Nominal/ig, '').trim();
-                document.getElementById('in-tujuan-bank').value = bank;
+                if (bank.length > 2) document.getElementById('in-tujuan-bank').value = bank;
             }
 
             syncPreviewData();
