@@ -4,105 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mustakim Mini ATM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     
     <style>
-        /* === VARIABEL WARNA (TEMA TERANG) === */
+        /* === VARIABEL WARNA MODERN === */
         :root {
-            --bg-body: #f1f5f9;
+            --bg-body: #f4f7fb;
             --bg-app: #ffffff;
-            --text-main: #0f172a;
+            --text-main: #1e293b;
             --text-muted: #64748b;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
+            --primary: #0284c7; /* Biru elegan */
+            --primary-hover: #0369a1;
             --border-color: #e2e8f0;
-            --card-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
         /* === RESET & DASAR === */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-body); display: flex; justify-content: center; min-height: 100vh; color: var(--text-main); }
         
-        /* Wadah Utama Aplikasi */
         .app-container {
-            background-color: var(--bg-app);
+            background-color: var(--bg-body);
             width: 100%;
             max-width: 480px; 
             min-height: 100vh;
             position: relative;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
             overflow-x: hidden;
         }
 
-        /* === HEADER UTAMA === */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-app); position: sticky; top: 0; z-index: 10; }
+        /* === HEADER APP === */
+        .header { 
+            background: var(--primary); 
+            color: white;
+            padding: 20px 20px 30px 20px; 
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: sticky; top: 0; z-index: 10; 
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
         .brand-info { display: flex; align-items: center; gap: 12px; }
-        .logo-box { background: #e0e7ff; color: var(--primary); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .brand-text h1 { font-size: 14px; font-weight: 700; line-height: 1.2; text-transform: uppercase; }
-        .brand-text p { font-size: 11px; color: var(--text-muted); }
+        .logo-box { background: rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(5px);}
+        .brand-text h1 { font-size: 16px; font-weight: 700; line-height: 1.2; letter-spacing: 0.5px;}
+        .brand-text p { font-size: 12px; color: #e0f2fe; opacity: 0.9;}
         
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-icon { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 5px; }
-        .btn-printer { background: #eff6ff; border: 1px solid #bfdbfe; color: var(--primary); font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;}
-        .btn-printer:active { background: #dbeafe; }
+        .btn-printer { background: white; color: var(--primary); font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 20px; border: none; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);}
+        .btn-printer:active { transform: scale(0.96); }
         
-        /* === HALAMAN SCAN & HASIL === */
-        .page { flex: 1; overflow-y: auto; padding-bottom: 80px; display: flex; flex-direction: column; }
+        /* === KONTEN UTAMA === */
+        .page { flex: 1; overflow-y: auto; padding-bottom: 90px; display: flex; flex-direction: column; margin-top: -20px; z-index: 2; padding-top: 10px;}
         .page.hidden { display: none; }
         
-        .upload-section { padding: 20px; display: flex; flex-direction: column; }
-        .upload-card { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 30px 20px; text-align: center; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .upload-icon { width: 50px; height: 50px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; }
+        /* Kartu Upload */
+        .upload-section { padding: 0 20px; margin-bottom: 15px; }
+        .upload-card { background: var(--card-bg); border-radius: 20px; padding: 25px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; gap: 15px; border: 1px solid rgba(0,0,0,0.04); }
+        .upload-icon { width: 56px; height: 56px; background: #f0f9ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px;}
         
-        /* Tombol Upload */
         .btn-group { display: flex; gap: 10px; width: 100%; }
-        .btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);}
+        .btn-secondary { background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-main); }
         
-        /* === TABS UNTUK EDIT & PREVIEW === */
-        #result-section { display: none; flex-direction: column; flex: 1; }
-        .tabs { display: flex; background: var(--bg-body); padding: 5px; margin: 0 20px 15px 20px; border-radius: 10px; }
-        .tab-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: 0.3s; }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        /* === TABS === */
+        #result-section { display: none; flex-direction: column; flex: 1; padding: 0 20px;}
+        .tabs { display: flex; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* Area Edit Data */
-        .edit-form { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
-        .form-group { display: flex; flex-direction: column; gap: 5px; }
-        .form-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-        .form-group input { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; color: var(--text-main); background: #fff; font-family: 'Inter', sans-serif;}
+        /* === FORM EDIT === */
+        .edit-form { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 16px; border: 1px solid rgba(0,0,0,0.04);}
+        .form-section-title { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-top: 5px;}
+        
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper i { position: absolute; left: 14px; color: #94a3b8; font-size: 14px;}
+        .form-group input { width: 100%; padding: 12px 14px 12px 38px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 14px; color: var(--text-main); font-weight: 500; transition: 0.2s; outline: none; background: #f8fafc;}
+        .form-group input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);}
 
-        /* === PREVIEW STRUK THERMAL === */
-        .preview-container { padding: 0 20px 20px 20px; display: none; flex-direction: column; align-items: center; }
-        .receipt-paper { background: white; width: 100%; max-width: 280px; padding: 20px 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); font-family: 'Space Mono', monospace; font-size: 11px; color: #000; border-radius: 4px; border: 1px solid #e2e8f0; }
-        .receipt-center { text-align: center; margin-bottom: 10px; }
-        .receipt-center h3 { font-size: 15px; font-weight: bold; margin-bottom: 2px; }
-        .receipt-line { border-top: 1px dashed #94a3b8; margin: 8px 0; }
-        .receipt-row { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
-        .receipt-row.bold { font-weight: bold; font-size: 12px; margin-top: 8px; }
+        /* PREVIEW KERTAS KASIR */
+        .preview-container { display: none; flex-direction: column; align-items: center; }
+        .receipt-paper { background: white; width: 100%; max-width: 300px; padding: 25px 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); font-family: 'Space Mono', monospace; font-size: 12px; color: #000; border-radius: 4px; border: 1px solid #e2e8f0; position: relative;}
+        /* Efek gerigi kertas bawah */
+        .receipt-paper::after { content: ""; position: absolute; bottom: -6px; left: 0; right: 0; height: 6px; background-size: 12px 12px; background-image: radial-gradient(circle at 6px 0, transparent 6px, white 6.5px); }
+        
+        .receipt-center { text-align: center; margin-bottom: 15px; }
+        .receipt-center h3 { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
+        .receipt-line { border-top: 1px dashed #64748b; margin: 10px 0; }
+        .receipt-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; line-height: 1.4;}
+        .receipt-row.bold { font-weight: bold; font-size: 14px; margin-top: 10px; padding-top: 5px; }
         .receipt-row span:last-child { text-align: right; word-break: break-word; }
 
         /* Loader Overlay */
-        .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;}
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; backdrop-filter: blur(3px);}
+        .spinner { border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Toast notifikasi */
-        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #0f172a; color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; z-index: 100; opacity: 0; transition: 0.3s; pointer-events: none; }
+        /* Toast Notifikasi */
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e293b; color: white; padding: 14px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 100; opacity: 0; transition: 0.3s; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); white-space: nowrap;}
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.error { background: #dc2626; }
-        .toast.success { background: #059669; }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
 
         /* === NAVIGASI BAWAH === */
-        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--bg-app); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0; z-index: 20; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 500; cursor: pointer; flex: 1; }
-        .nav-item i { font-size: 20px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: white; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 12px 0 16px 0; z-index: 50; box-shadow: 0 -4px 15px rgba(0,0,0,0.03); border-top-left-radius: 20px; border-top-right-radius: 20px;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; flex: 1; transition: 0.2s;}
+        .nav-item i { font-size: 20px; transition: 0.2s;}
         .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: translateY(-2px); }
     </style>
 </head>
 <body>
@@ -111,37 +128,36 @@
         
         <div class="loader-overlay" id="loader">
             <div class="spinner"></div>
-            <h3 id="loader-title" style="font-size: 16px; color: var(--text-main);">Memproses Gambar...</h3>
-            <p id="loader-sub" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">AI sedang membaca teks pada struk</p>
+            <h3 id="loader-title" style="font-size: 18px; font-weight: 700;">Memproses...</h3>
+            <p id="loader-sub" style="font-size: 14px; color: var(--text-muted); margin-top: 5px;">Mohon tunggu sebentar</p>
         </div>
 
         <div class="toast" id="toast"></div>
 
         <header class="header">
-            <div class="brand-info">
-                <div class="logo-box"><i class="fa-solid fa-receipt"></i></div>
-                <div class="brand-text">
-                    <h1>ATM MINI</h1>
-                    <p>Cetak Struk Transfer</p>
+            <div class="header-top">
+                <div class="brand-info">
+                    <div class="logo-box"><i class="fa-solid fa-receipt"></i></div>
+                    <div class="brand-text">
+                        <h1>ATM MINI</h1>
+                        <p>Cetak Struk Pintar</p>
+                    </div>
                 </div>
-            </div>
-            <div class="header-actions">
                 <button class="btn-printer" id="btn-printer" onclick="printReceiptBluetooth()">
-                    <i class="fa-brands fa-bluetooth"></i> <span id="printer-label">Cetak Printer</span>
+                    <i class="fa-solid fa-print"></i> <span>Cetak</span>
                 </button>
             </div>
         </header>
 
         <div id="page-scan" class="page">
-            
             <div class="upload-section">
                 <div class="upload-card">
-                    <img id="image-preview" style="display: none; width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);" alt="Preview Struk" />
+                    <img id="image-preview" style="display: none; width: 100%; max-height: 250px; object-fit: contain; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);" alt="Preview Struk" />
                     
                     <div id="upload-placeholder">
-                        <div class="upload-icon"><i class="fa-regular fa-image"></i></div>
-                        <h2 style="font-size: 16px; font-weight: 700;">Upload Bukti Transfer</h2>
-                        <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0 15px 0;">Foto screenshot bukti transfer (BRImo, BCA, Mandiri, dll)</p>
+                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main);">Upload Struk Bank</h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 8px 0 20px 0; line-height: 1.5;">Pilih screenshot bukti transfer untuk<br>membaca data secara otomatis.</p>
                     </div>
 
                     <input type="file" id="kamera-input" accept="image/*" capture="environment" style="display: none;">
@@ -152,7 +168,7 @@
                             <i class="fa-solid fa-camera"></i> Kamera
                         </button>
                         <button class="btn btn-secondary" onclick="document.getElementById('galeri-input').click()">
-                            <i class="fa-solid fa-upload"></i> Galeri
+                            <i class="fa-regular fa-image"></i> Galeri
                         </button>
                     </div>
                 </div>
@@ -160,27 +176,55 @@
 
             <div id="result-section">
                 <div class="tabs">
-                    <div class="tab-btn active" onclick="switchTab('edit', this)"><i class="fa-solid fa-pen"></i> Edit Data</div>
-                    <div class="tab-btn" onclick="switchTab('preview', this)"><i class="fa-solid fa-eye"></i> Pratinjau Struk</div>
+                    <div class="tab-btn active" onclick="switchTab('edit', this)"><i class="fa-solid fa-pen-to-square"></i> Form Data</div>
+                    <div class="tab-btn" onclick="switchTab('preview', this)"><i class="fa-solid fa-print"></i> Pratinjau</div>
                 </div>
 
                 <div id="tab-edit" class="edit-form">
-                    <div class="form-group"><label>Tanggal & Waktu</label><input type="text" id="in-tanggal"></div>
-                    <div class="form-group"><label>Nomor Referensi</label><input type="text" id="in-ref"></div>
                     
-                    <div style="border-left: 3px solid var(--primary); padding-left: 10px; margin-top: 10px;">
-                        <div class="form-group"><label>Nama Pengirim</label><input type="text" id="in-pengirim-nama"></div>
-                        <div class="form-group" style="margin-top: 8px;"><label>Rekening Pengirim</label><input type="text" id="in-pengirim-rek"></div>
+                    <div class="form-section-title">Informasi Transaksi</div>
+                    <div class="form-group">
+                        <label>Tanggal & Waktu</label>
+                        <div class="input-wrapper"><i class="fa-regular fa-calendar"></i><input type="text" id="in-tanggal"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor Referensi</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-hashtag"></i><input type="text" id="in-ref"></div>
+                    </div>
+                    
+                    <div class="form-section-title" style="margin-top: 10px; color: #f59e0b;">Detail Pengirim</div>
+                    <div class="form-group">
+                        <label>Nama Pengirim</label>
+                        <div class="input-wrapper"><i class="fa-regular fa-user"></i><input type="text" id="in-pengirim-nama"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Rekening Pengirim</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-credit-card"></i><input type="text" id="in-pengirim-rek"></div>
                     </div>
 
-                    <div style="border-left: 3px solid #10b981; padding-left: 10px; margin-top: 10px;">
-                        <div class="form-group"><label>Nama Tujuan</label><input type="text" id="in-tujuan-nama"></div>
-                        <div class="form-group" style="margin-top: 8px;"><label>Rekening Tujuan</label><input type="text" id="in-tujuan-rek"></div>
-                        <div class="form-group" style="margin-top: 8px;"><label>Bank Tujuan</label><input type="text" id="in-tujuan-bank" value="BANK BRI"></div>
+                    <div class="form-section-title" style="margin-top: 10px; color: var(--success);">Detail Penerima</div>
+                    <div class="form-group">
+                        <label>Nama Tujuan</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-user-check"></i><input type="text" id="in-tujuan-nama"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Rekening Tujuan</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-building-columns"></i><input type="text" id="in-tujuan-rek"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bank Tujuan</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-bank"></i><input type="text" id="in-tujuan-bank" value="BANK BRI"></div>
                     </div>
 
-                    <div class="form-group" style="margin-top: 10px;"><label>Nominal (Rp)</label><input type="text" id="in-nominal" inputmode="numeric"></div>
-                    <div class="form-group"><label>Biaya Admin (Rp)</label><input type="text" id="in-admin" inputmode="numeric" value="0"></div>
+                    <div class="form-section-title" style="margin-top: 10px;">Rincian Dana</div>
+                    <div class="form-group">
+                        <label>Nominal (Rp)</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-rupiah-sign"></i><input type="text" id="in-nominal" inputmode="numeric"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Biaya Admin (Rp)</label>
+                        <div class="input-wrapper"><i class="fa-solid fa-file-invoice-dollar"></i><input type="text" id="in-admin" inputmode="numeric" value="0"></div>
+                    </div>
                 </div>
 
                 <div id="tab-preview" class="preview-container">
@@ -192,7 +236,7 @@
                         </div>
                         <div class="receipt-line"></div>
                         <div class="receipt-row"><span>Tanggal</span><span id="out-tanggal">--</span></div>
-                        <div class="receipt-row"><span>No. Referensi</span><span id="out-ref">--</span></div>
+                        <div class="receipt-row"><span>No. Ref</span><span id="out-ref">--</span></div>
                         <div class="receipt-line"></div>
                         <div class="receipt-row"><span>PENGIRIM</span></div>
                         <div class="receipt-row"><span>Nama</span><span id="out-pengirim-nama">--</span></div>
@@ -208,59 +252,88 @@
                         <div class="receipt-row bold"><span>TOTAL</span><span id="out-total">Rp 0</span></div>
                         <div class="receipt-line"></div>
                         <div class="receipt-center" style="margin-top: 20px;">
-                            <p>Transaksi berhasil</p>
-                            <p>Terima kasih telah menggunakan<br>layanan kami</p>
+                            <p>Transaksi Berhasil</p>
+                            <p style="margin-top:5px">Terima kasih telah<br>menggunakan layanan kami</p>
                             <p style="margin-top:10px">==============================</p>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
         <div id="page-riwayat" class="page hidden">
-            <div style="padding: 20px;">
-                <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 15px;">Riwayat Transaksi</h2>
-                <div id="riwayat-empty" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-                    <i class="fa-regular fa-folder-open" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
-                    <p style="font-size: 13px;">Belum ada transaksi tersimpan.</p>
+            <div style="padding: 0 20px;">
+                <h2 style="font-size: 16px; font-weight: 700; margin: 10px 0 15px 0;">Riwayat Transaksi</h2>
+                <div id="riwayat-loading" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    <div class="spinner" style="margin: 0 auto 10px auto; width: 30px; height: 30px; border-width: 3px;"></div>
+                    <p style="font-size: 13px;">Memuat data...</p>
                 </div>
+                <div id="riwayat-empty" style="text-align: center; padding: 40px 20px; color: var(--text-muted); display: none;">
+                    <i class="fa-regular fa-folder-open" style="font-size: 40px; margin-bottom: 15px; display: block; color: #cbd5e1;"></i>
+                    <p style="font-size: 14px; font-weight: 500;">Belum ada riwayat transaksi</p>
+                </div>
+                <div id="riwayat-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
             </div>
         </div>
 
         <nav class="bottom-nav">
             <div class="nav-item active" id="nav-pindai" onclick="switchPage('scan')">
-                <i class="fa-solid fa-expand"></i>
-                <span>Pindai</span>
+                <i class="fa-solid fa-qrcode"></i>
+                <span>Scan Struk</span>
             </div>
             <div class="nav-item" id="nav-riwayat" onclick="switchPage('riwayat')">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 <span>Riwayat</span>
             </div>
         </nav>
-
     </div>
 
     <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/.../exec"; 
+
+        // Fungsi Format Tanggal Lengkap (Sesuai Permintaan Logika Database)
+        function formatTanggalPanjang(dateObj) {
+            const hariArr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const bulanArr = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const hari = hariArr[dateObj.getDay()];
+            const tanggal = dateObj.getDate();
+            const bulan = bulanArr[dateObj.getMonth()];
+            const tahun = dateObj.getFullYear();
+            
+            let jam = dateObj.getHours().toString().padStart(2, '0');
+            let menit = dateObj.getMinutes().toString().padStart(2, '0');
+            
+            return `${hari}, ${tanggal} ${bulan} ${tahun} ${jam}:${menit}`;
+        }
+
+        // Set Default Input Tanggal dengan Format Panjang
+        document.getElementById('in-tanggal').value = formatTanggalPanjang(new Date());
+
         let toastTimer = null;
-        function showToast(message, type = 'info', duration = 3000) {
+        function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast show' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '');
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => { toast.classList.remove('show'); }, duration);
+            toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
         function switchPage(pageName) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById('page-' + pageName).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('nav-' + pageName).classList.add('active');
+            
+            if(pageName === 'scan') {
+                document.getElementById('nav-pindai').classList.add('active');
+            } else if(pageName === 'riwayat') {
+                document.getElementById('nav-riwayat').classList.add('active');
+                // loadRiwayatData(); // Aktifkan jika URL Web App sudah benar
+            }
         }
 
         function switchTab(tabName, clickedEl) {
-            const tabs = document.querySelectorAll('.tab-btn');
-            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
             if (clickedEl) clickedEl.classList.add('active');
 
             if(tabName === 'edit') {
@@ -302,9 +375,7 @@
             input.addEventListener('input', syncPreviewData);
         });
 
-        // -------------------------------------------------------------
-        // UPDATE 1: LOGIKA UPLOAD & OCR GAMBAR (TESSERACT)
-        // -------------------------------------------------------------
+        // === LOGIKA UPLOAD & OCR ===
         document.getElementById('kamera-input').addEventListener('change', handleImageUpload);
         document.getElementById('galeri-input').addEventListener('change', handleImageUpload);
 
@@ -325,25 +396,22 @@
 
         function processOCR(imageSrc) {
             const loader = document.getElementById('loader');
-            const resultSection = document.getElementById('result-section');
+            document.getElementById('loader-title').innerText = "Menganalisis Struk...";
+            document.getElementById('loader-sub').innerText = "AI sedang mengekstrak data dari gambar";
             loader.style.display = 'flex';
-            resultSection.style.display = 'none';
 
             Tesseract.recognize(
-                imageSrc,
-                'ind',
-                {
+                imageSrc, 'ind', {
                     logger: m => console.log(m),
-                    // MODE 4 ATAU 3 LEBIH BAIK UNTUK LAYOUT STRUK PERBANKAN
                     tessedit_pageseg_mode: '4', 
                     tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,:/*- '
                 }
             ).then(({ data: { text } }) => {
                 loader.style.display = 'none';
-                resultSection.style.display = 'flex';
+                document.getElementById('result-section').style.display = 'flex';
                 extractDataFromText(text);
                 switchTab('edit', document.querySelectorAll('.tab-btn')[0]);
-                showToast('Struk terbaca. Cek & lengkapi data sebelum cetak.', 'success');
+                showToast('Struk berhasil dibaca', 'success');
             }).catch(err => {
                 console.error(err);
                 loader.style.display = 'none';
@@ -351,15 +419,9 @@
             });
         }
 
-        // -------------------------------------------------------------
-        // UPDATE 2: LOGIKA PARSING / REGEX UNTUK TEKS BRIMO
-        // -------------------------------------------------------------
         function extractDataFromText(text) {
             const matchNominal = text.match(/Nominal\s*(?:Rp)?\s*([\d\.]+)/i);
             if (matchNominal) document.getElementById('in-nominal').value = matchNominal[1].replace(/\./g, '');
-
-            const matchTgl = text.match(/(?:Tanggal|Waktu)\s*[:]?\s*([\d\/\-\s:]+)/i);
-            if (matchTgl) document.getElementById('in-tanggal').value = matchTgl[1].trim();
 
             const matchRef = text.match(/(?:Referensi|Ref)\s*[:]?\s*(\d+)/i);
             if (matchRef) document.getElementById('in-ref').value = matchRef[1];
@@ -379,38 +441,36 @@
             syncPreviewData();
         }
 
-        // -------------------------------------------------------------
-        // UPDATE 3: FORMAT RAWBT BLUETOOTH PRINTER THERMAL (32 KARAKTER)
-        // -------------------------------------------------------------
         function formatKiriKanan(kiri, kanan) {
-            kiri = String(kiri);
-            kanan = String(kanan);
-            // Kertas 58mm umumnya mentolerir maksimal 32 karakter per baris
+            kiri = String(kiri); kanan = String(kanan);
             let sisaSpasi = 32 - (kiri.length + kanan.length);
             if (sisaSpasi < 1) sisaSpasi = 1; 
             return kiri + " ".repeat(sisaSpasi) + kanan + "\n";
         }
 
-        function printReceiptBluetooth() {
-            let tgl = document.getElementById('out-tanggal').innerText;
-            let ref = document.getElementById('out-ref').innerText;
-            let pengirimNama = document.getElementById('out-pengirim-nama').innerText;
-            let pengirimRek = document.getElementById('out-pengirim-rek').innerText;
-            let tujuanNama = document.getElementById('out-tujuan-nama').innerText;
-            let tujuanRek = document.getElementById('out-tujuan-rek').innerText;
-            let tujuanBank = document.getElementById('out-tujuan-bank').innerText;
-            let nominal = document.getElementById('out-nominal').innerText;
-            let admin = document.getElementById('out-admin').innerText;
-            let total = document.getElementById('out-total').innerText;
+        // === FUNGSI CETAK PRINTER ===
+        async function printReceiptBluetooth() {
+            const tgl = document.getElementById('out-tanggal').innerText;
+            const ref = document.getElementById('out-ref').innerText;
+            const pengirimNama = document.getElementById('out-pengirim-nama').innerText;
+            const pengirimRek = document.getElementById('out-pengirim-rek').innerText;
+            const tujuanNama = document.getElementById('out-tujuan-nama').innerText;
+            const tujuanRek = document.getElementById('out-tujuan-rek').innerText;
+            const tujuanBank = document.getElementById('out-tujuan-bank').innerText;
+            const nominal = document.getElementById('out-nominal').innerText;
+            const admin = document.getElementById('out-admin').innerText;
+            const total = document.getElementById('out-total').innerText;
+
+            if(nominal === 'Rp 0') {
+                showToast('Mohon lengkapi data nominal', 'error');
+                return;
+            }
 
             let cetak = "";
-            // HEADER (Panjang disesuaikan persis 32 karakter dengan spasi kiri kanan)
             cetak += "            MUSTAKIM            \n"; 
             cetak += "            ATM MINI            \n";
             cetak += "         BUKTI TRANSFER         \n";
             cetak += "--------------------------------\n";
-            
-            // BODY STRUK
             cetak += formatKiriKanan("Tanggal", tgl);
             cetak += formatKiriKanan("No. Ref", ref);
             cetak += "--------------------------------\n";
@@ -427,18 +487,12 @@
             cetak += formatKiriKanan("Biaya Admin", admin);
             cetak += formatKiriKanan("TOTAL", total);
             cetak += "--------------------------------\n";
-            
-            // FOOTER
-            cetak += "       Transaksi berhasil       \n";
+            cetak += "       Transaksi Berhasil       \n";
             cetak += "   Terima kasih telah menggu-   \n";
             cetak += "       nakan layanan kami       \n";
             cetak += "================================\n\n\n";
 
-            // Intent RawBT untuk Android
-            let encodeData = encodeURI(cetak);
-            window.location.href = "intent:" + encodeData + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
-            
-            showToast('Meneruskan teks ke Aplikasi Printer Bluetooth...', 'info');
+            window.location.href = "intent:" + encodeURI(cetak) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
         }
     </script>
 </body>
