@@ -10,6 +10,8 @@
     
     <!-- PUSTAKA TESSERACT.JS UNTUK BACA GAMBAR KE TEKS -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <!-- PUSTAKA HTML2CANVAS UNTUK RENDER STRUK JADI GAMBAR (fitur Share WA) -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     
     <style>
         /* === VARIABEL WARNA (TEMA TERANG) === */
@@ -233,10 +235,10 @@
                         <i class="fa-solid fa-wallet"></i> Topup E-Wallet
                     </button>
                     <button type="button" class="chip-jenis" data-jenis="listrik" onclick="pilihJenisTransaksi('listrik', this)">
-                        <i class="fa-solid fa-file-invoice"></i> Token PLN
+                        <i class="fa-solid fa-bolt"></i> Token PLN
                     </button>
                     <button type="button" class="chip-jenis" data-jenis="tagihan" onclick="pilihJenisTransaksi('tagihan', this)">
-                        <i class="fa-solid fa-ellipsis"></i> Bayar Tagihan
+                        <i class="fa-solid fa-file-invoice"></i> Bayar Tagihan
                     </button>
                 </div>
             </div>
@@ -359,7 +361,7 @@
                         <button class="btn btn-secondary" style="flex: 1;" onclick="simpanKeRiwayat()">
                             <i class="fa-solid fa-floppy-disk"></i> Simpan
                         </button>
-                        <button class="btn" style="flex: 1; background: #25D366; color: white;" onclick="shareKeWhatsApp()">
+                        <button class="btn" style="flex: 1; background: #25D366; color: white;" onclick="shareKeWhatsApp(this)">
                             <i class="fa-brands fa-whatsapp"></i> Share WA
                         </button>
                     </div>
@@ -471,15 +473,15 @@
             },
             listrik: {
                 labelUploadJudul: 'Upload Bukti Token PLN',
-                labelUploadSub: 'Foto screenshot bukti bayar listrik, pulsa, internet, dll',
+                labelUploadSub: 'Foto screenshot bukti beli token/bayar tagihan listrik PLN',
                 labelPengirim: 'PEMBAYAR', labelPengirimNama: 'Nama Pembayar', labelPengirimRek: 'Rekening/Sumber Dana',
-                labelTujuan: 'LAYANAN', labelTujuanNama: 'Nama Pelanggan', labelTujuanRek: 'Jenis Layanan', labelTujuanBank: 'Penyedia Layanan',
+                labelTujuan: 'PLN', labelTujuanNama: 'ID Pelanggan/Meter', labelTujuanRek: 'Daya/Tarif', labelTujuanBank: 'Penyedia Layanan',
                 showNoPelanggan: true,
-                judulStruk: 'BUKTI PEMBAYARAN'
+                judulStruk: 'BUKTI TOKEN LISTRIK'
             },
             tagihan: {
                 labelUploadJudul: 'Upload Bukti Bayar Tagihan',
-                labelUploadSub: 'Foto screenshot bukti bayar listrik, BPJS, KREDIT, dll',
+                labelUploadSub: 'Foto screenshot bukti bayar BPJS, kredit, pulsa, internet, dll',
                 labelPengirim: 'PEMBAYAR', labelPengirimNama: 'Nama Pembayar', labelPengirimRek: 'Rekening/Sumber Dana',
                 labelTujuan: 'LAYANAN', labelTujuanNama: 'Nama Pelanggan', labelTujuanRek: 'Jenis Layanan', labelTujuanBank: 'Penyedia Layanan',
                 showNoPelanggan: true,
@@ -756,22 +758,57 @@
             
             let dataText = text.replace(/\n/g, ' '); // Gabungan teks untuk pencarian global
 
+            // PENTING: kosongkan field sebelumnya SEBELUM mencoba mengisi yang
+            // baru. Tanpa ini, kalau pola tidak ditemukan di gambar yang baru
+            // di-scan (mis. struk DANA tidak punya kata "Ref" seperti struk
+            // bank), field akan diam-diam menyisakan NILAI LAMA dari scan
+            // sebelumnya -- terlihat seperti "salah baca", padahal sebenarnya
+            // residu data yang tidak pernah di-reset.
+            document.getElementById('in-nominal').value = '';
+            document.getElementById('in-ref').value = '';
+            document.getElementById('in-tanggal').value = '';
+            const noPelangganElReset = document.getElementById('in-no-pelanggan');
+            if (noPelangganElReset) noPelangganElReset.value = '';
+
             // 1. Cari Nominal (Rp diikuti angka dan titik)
             const nominalMatch = dataText.match(/Rp\s*([\d\.]+)/i);
             if(nominalMatch) document.getElementById('in-nominal').value = nominalMatch[1].replace(/\./g, '');
 
-            // 2. Cari No Referensi (deretan angka panjang setelah kata Ref)
-            const refMatch = dataText.match(/Ref(?:erensi)?.*?(\d{10,})/i);
+            // 2. Cari No Referensi / ID Transaksi (deretan angka panjang).
+            // Struk bank biasa pakai kata "Ref"/"Referensi", tapi struk
+            // e-wallet (DANA, OVO, dll) sering pakai istilah "ID Transaksi"
+            // -- keduanya perlu didukung. ID Transaksi DANA juga kadang
+            // terpecah jadi 2 baris oleh OCR (mis. "...10010" lalu baris baru
+            // "0166939536505538"), jadi dataText yang sudah digabung spasi
+            // (bukan per-baris) akan menyatukan keduanya secara alami.
+            const refMatch = dataText.match(/(?:Ref(?:erensi)?|ID\s*Transaksi)[:\s]*\D{0,5}(\d{10,})/i);
             if(refMatch) document.getElementById('in-ref').value = refMatch[1];
 
-            // 3. Cari Tanggal (contoh pola: 17 Juni 2026, 13:43:32 WIB)
-            const dateMatch = dataText.match(/(\d{1,2}\s+[A-Za-z]+\s+\d{4}[,\s]+\d{2}:\d{2}(?::\d{2})?(?:\s+WIB|\s+WITA|\s+WIT)?)/i);
-            if(dateMatch) document.getElementById('in-tanggal').value = dateMatch[1];
+            // 3. Cari Tanggal (contoh pola: "17 Juni 2026, 13:43:32 WIB", atau
+            // format singkat ala DANA "21 Jun 2026 « 11:21" -- OCR sering
+            // salah baca tanda baca pemisah tanggal-jam jadi simbol aneh
+            // (mis. "«" alih-alih koma), jadi dipecah jadi 2 grup terpisah
+            // dengan pemisah toleran (\D{0,3}) alih-alih satu pola kaku.
+            const dateMatch = dataText.match(/(\d{1,2}\s+[A-Za-z]+\s+\d{4})\D{0,3}(\d{2}:\d{2}(?::\d{2})?)\s*(WIB|WITA|WIT)?/i);
+            if (dateMatch) {
+                document.getElementById('in-tanggal').value =
+                    dateMatch[1] + ', ' + dateMatch[2] + (dateMatch[3] ? ' ' + dateMatch[3].toUpperCase() : '');
+            }
 
             // 4. Ekstrak Pengirim & Penerima dengan metode Blok (Block Parsing)
             let section = 'none';
             let pengirimData = [];
             let tujuanData = [];
+
+            // Beberapa struk (mis. DANA) menulis label dan value dalam SATU
+            // baris yang sama (contoh: "Nama Siti Kheeeeah", "Akun DANA
+            // 085242655517") -- berbeda dari struk bank (BRImo) yang barisnya
+            // selalu terpisah. Fungsi ini membuang label di awal baris kalau
+            // terdeteksi, supaya value-nya saja yang diproses lebih lanjut
+            // (mis. "Nama Siti Kheeeeah" -> "Siti Kheeeeah").
+            const stripLabelPrefix = (line) => {
+                return line.replace(/^(nama|rekening|akun(?:\s*dana)?|no\.?\s*rekening|nomor\s*hp|id\s*akun)[:\s]+/i, '').trim();
+            };
 
             for (let line of lines) {
                 let lLower = line.toLowerCase();
@@ -786,20 +823,69 @@
                     continue;
                 }
                 // Deteksi akhir blok
-                if (lLower.includes('jenis transaksi') || lLower.includes('catatan') || lLower.includes('nominal') || lLower.includes('rincian')) {
+                if (lLower.includes('jenis transaksi') || lLower.includes('catatan') || lLower.includes('nominal') || lLower.includes('rincian') || lLower.includes('detail transaksi') || lLower.includes('metode pembayaran')) {
                     section = 'none';
                 }
 
-                if (section === 'pengirim') pengirimData.push(line);
-                if (section === 'tujuan') tujuanData.push(line);
+                if (section === 'pengirim') pengirimData.push(stripLabelPrefix(line));
+                if (section === 'tujuan') tujuanData.push(stripLabelPrefix(line));
             }
 
-            // Deteksi No. Pelanggan / ID (untuk jenis "Bayar Tagihan"): biasanya
-            // ditulis sebagai "ID Pelanggan: 123456" atau "No. Pelanggan 123456"
-            // atau "Nomor Meter/Token: 123456" di struk PLN/pulsa/internet.
-            const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\s*meter|nomor\s*number|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
+            // Deteksi No. Pelanggan / Token, berbeda strategi tergantung jenis
+            // transaksi yang sedang aktif:
+            //
+            // - Jenis "listrik" (Token PLN): token SELALU 20 digit angka,
+            //   TAPI posisinya di struk berbeda-beda tergantung platform
+            //   pembayaran (BRImo, ShopeePay, DANA, dll menaruhnya di tempat
+            //   berbeda) -- jadi pencarian harus platform-agnostic, menyisir
+            //   SELURUH teks untuk pola 20-digit, bukan bergantung pada blok/
+            //   posisi tertentu. Strategi 2 tahap:
+            //     1) Kata kunci eksplisit ("Token", "Stroom", "Serial", dst)
+            //        di dekat angka -- paling akurat kalau ada.
+            //     2) Scan SEMUA kemunculan pola 20-digit murni di teks, lalu
+            //        ABAIKAN kandidat yang context-nya jelas BUKAN token
+            //        (mis. berdekatan dengan "ID Transaksi"/"Order"/"Ref"/
+            //        "Merchant" -- itu nomor transaksi platform, bukan token
+            //        listrik). Dari sisa kandidat, ambil yang pertama.
+            //   Nama & ID Pelanggan TIDAK dipaksa diisi -- kalau pola tidak
+            //   ditemukan di teks, field dibiarkan kosong (sudah di-reset di
+            //   awal fungsi ini), bukan diisi dengan tebakan asal.
             const noPelangganEl = document.getElementById('in-no-pelanggan');
-            if (noPelangganMatch && noPelangganEl) noPelangganEl.value = noPelangganMatch[1];
+            if (noPelangganEl) {
+                if (jenisTransaksiAktif === 'listrik') {
+                    // Tahap 1: token dengan kata kunci eksplisit di dekatnya
+                    const tokenMatch = dataText.match(/(?:token|stroom|kode\s*token|no\.?\s*token|serial\s*number)[:\s]*((?:\d[\s\-]?){20})/i);
+                    if (tokenMatch) {
+                        noPelangganEl.value = tokenMatch[1].replace(/[\s\-]/g, '');
+                    } else {
+                        // Tahap 2: scan semua kandidat 20-digit, buang yang
+                        // konteksnya jelas ID transaksi/referensi platform
+                        const kandidatToken = [...dataText.matchAll(/\b(?:\d[\s\-]?){20}\b/g)];
+                        const kataKunciBukanToken = /(id\s*transaksi|no\.?\s*ref|referensi|order|merchant|invoice)/i;
+
+                        for (const kandidat of kandidatToken) {
+                            const posisi = kandidat.index;
+                            // Cek 30 karakter SEBELUM kandidat -- kalau ada
+                            // kata kunci "ID Transaksi"/"Ref"/dst di situ,
+                            // kandidat ini kemungkinan besar BUKAN token PLN
+                            const konteksSebelum = dataText.substring(Math.max(0, posisi - 30), posisi);
+                            if (!kataKunciBukanToken.test(konteksSebelum)) {
+                                noPelangganEl.value = kandidat[0].replace(/[\s\-]/g, '');
+                                break; // ambil kandidat pertama yang lolos filter
+                            }
+                        }
+                    }
+                    // Catatan: kalau setelah 2 tahap di atas tetap tidak ada
+                    // kandidat yang lolos, in-no-pelanggan TETAP KOSONG --
+                    // tidak ada fallback paksa, sesuai prinsip "biarkan
+                    // kosong jika benar-benar tidak ditemukan".
+                } else {
+                    // Deteksi umum: ID Pelanggan/No. Pelanggan/Nomor Meter,
+                    // dst -- untuk jenis Bayar Tagihan (BPJS, kredit, dll)
+                    const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\s*meter|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
+                    if (noPelangganMatch) noPelangganEl.value = noPelangganMatch[1];
+                }
+            }
 
             // Deteksi nomor HP Indonesia (untuk jenis "Topup E-Wallet"): pola
             // umum 08xx atau 628xx, panjang 10-13 digit.
@@ -1374,16 +1460,118 @@
             return msg;
         }
 
-        function shareKeWhatsApp() {
+        // Render elemen preview struk (#printable-receipt) jadi file gambar
+        // PNG. Dipakai untuk fitur Share WA supaya hasilnya berupa KARTU
+        // STRUK visual (sama seperti tampilan Pratinjau Struk), bukan teks
+        // polos -- karena WhatsApp tidak punya cara memformat tabel/kotak
+        // dari teks biasa.
+        async function renderReceiptAsImage() {
+            const receiptEl = document.getElementById('printable-receipt');
+
+            // html2canvas butuh elemen benar-benar VISIBLE (bukan display:none)
+            // untuk bisa mengukur & merender layout dengan akurat. Karena tab
+            // "Pratinjau Struk" mungkin sedang tidak aktif saat tombol Share
+            // ditekan, kita sementara paksa tampilkan dulu, render, baru
+            // kembalikan ke kondisi semula setelah selesai.
+            const tabPreview = document.getElementById('tab-preview');
+            const tabEdit = document.getElementById('tab-edit');
+            const previewWasHidden = tabPreview.style.display !== 'flex';
+            const editWasVisible = tabEdit.style.display !== 'none';
+
+            if (previewWasHidden) {
+                tabPreview.style.display = 'flex';
+                tabEdit.style.display = 'none';
+            }
+
+            // Pastikan data terbaru sudah ter-render ke elemen preview
+            // sebelum di-screenshot (mis. kalau user baru saja edit field
+            // tapi belum sempat pindah tab manual).
+            syncPreviewData();
+
+            // Beri waktu sedikit untuk browser selesai reflow/repaint layout
+            // sebelum html2canvas mulai mengambil snapshot.
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            let canvas;
+            try {
+                canvas = await html2canvas(receiptEl, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // resolusi 2x supaya hasil gambar tajam saat dibuka di WA
+                    useCORS: true,
+                    logging: false
+                });
+            } finally {
+                // Kembalikan tampilan tab ke kondisi semula
+                if (previewWasHidden) {
+                    tabPreview.style.display = 'none';
+                    tabEdit.style.display = editWasVisible ? 'flex' : 'none';
+                }
+            }
+
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error('Gagal membuat gambar dari struk'));
+                }, 'image/png');
+            });
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        async function shareKeWhatsApp(btnEl) {
             if (!validateBeforePrint()) return; // pastikan nominal terisi sebelum share
 
-            const text = buildReceiptPlainText();
-            const encodedText = encodeURIComponent(text);
-            // wa.me tanpa nomor tujuan -> WhatsApp akan minta user pilih kontak
-            // tujuan sendiri (cocok untuk kasus "share struk", bukan kirim ke
-            // nomor tertentu yang sudah ditentukan di awal).
-            const waUrl = `https://wa.me/?text=${encodedText}`;
-            window.open(waUrl, '_blank');
+            const originalHtml = btnEl ? btnEl.innerHTML : null;
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membuat gambar...';
+            }
+
+            try {
+                const blob = await renderReceiptAsImage();
+                const filename = `struk-${(document.getElementById('in-ref').value || 'mustakim').replace(/\s/g, '')}.png`;
+                const file = new File([blob], filename, { type: 'image/png' });
+
+                // Web Share API dengan file: ini cara PALING langsung membuka
+                // share-sheet HP (termasuk opsi WhatsApp) dengan gambar siap
+                // kirim. Didukung di Chrome Android & sebagian besar browser
+                // mobile modern, tapi TIDAK didukung semua browser desktop.
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Struk Mustakim Mini ATM',
+                        text: 'Bukti transaksi dari Mustakim Mini ATM'
+                    });
+                    showToast('Struk siap dibagikan.', 'success');
+                } else {
+                    // Fallback: browser tidak mendukung share file langsung
+                    // (mis. dibuka dari desktop/browser lama) -> download
+                    // gambarnya, supaya user tetap bisa upload manual ke WA.
+                    downloadBlob(blob, filename);
+                    showToast('Gambar struk diunduh. Silakan kirim manual via WhatsApp.', 'info', 4500);
+                }
+            } catch (error) {
+                console.error(error);
+                if (error.name === 'AbortError') {
+                    // User membatalkan share-sheet -- bukan error, jangan tampilkan toast merah
+                } else {
+                    showToast('Gagal membuat gambar struk untuk dibagikan.', 'error', 4000);
+                }
+            } finally {
+                if (btnEl && originalHtml) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = originalHtml;
+                }
+            }
         }
 
         async function loadRiwayat() {
