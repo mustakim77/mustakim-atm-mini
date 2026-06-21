@@ -1,999 +1,1444 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <base target="_top">
-  <!-- SCRIPT ANTI-GAGAL UNTUK GOOGLE SITES: Deteksi HP -->
-  <script>
-    if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      document.documentElement.classList.add('mode-hp');
-    }
-  </script>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --primary: #2d60ff; --bg: #f4f7fe; --text: #333333; --border: #e0e0e0;
-      --c1: #3b82f6; --c2: #10b981; --c3: #8b5cf6; --c4: #f59e0b; --c5: #ef4444; --c6: #06b6d4;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-    body { background: var(--bg); display: flex; height: 100dvh; overflow: hidden; color: var(--text); }
-
-    /* SIDEBAR */
-    .sidebar { width: 250px; background: white; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; z-index: 10; }
-    .logo { font-size: 20px; font-weight: bold; color: var(--primary); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
-    .nav-link { padding: 12px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; border-radius: 8px; color: #666; font-weight: 500; }
-    .nav-link.active { background: var(--primary); color: white; }
-
-    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-    .view { display: none; height: 100%; width: 100%; flex-direction: column; overflow-y: auto; }
-    .view.active { display: flex; }
-
-    /* BOTTOM NAV */
-    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid var(--border); z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom, 15px); }
-    .bottom-nav-item { flex: 1; text-align: center; padding: 10px 0; color: #888; font-size: 20px; cursor: pointer; position: relative; }
-    .bottom-nav-item.active { color: var(--primary); }
-    .bottom-nav-item span.label { display: block; font-size: 10px; margin-top: 4px; font-weight: bold; }
-    .cart-badge { position: absolute; top: 2px; right: calc(50% - 25px); background: var(--c5); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; display: none; }
-
-    /* DASHBOARD */
-    .dashboard-content { padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
-    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .user-profile { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 45px; height: 45px; background: var(--c1); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; }
-    .greeting p { font-size: 12px; color: #888; margin-bottom: 2px; }
-    .greeting h4 { font-size: 16px; font-weight: bold; }
-    .bell-icon { font-size: 20px; color: #888; background: white; padding: 10px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-    .earning-card { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 25px; color: white; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(59,130,246,0.3); margin-bottom: 20px; }
-    .earning-card::after { content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-    .earning-card p { font-size: 13px; opacity: 0.8; margin-bottom: 8px; }
-    .earning-card h2 { font-size: 28px; font-weight: bold; letter-spacing: 1px; }
-
-    .dash-section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
-    .dash-section-title span { font-size: 12px; color: var(--primary); font-weight: 500; cursor: pointer; }
-    .quick-actions { display: flex; justify-content: space-between; margin-bottom: 30px; }
-    .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-    .action-icon { width: 50px; height: 50px; border-radius: 15px; background: #e0e7ff; color: var(--primary); display: flex; justify-content: center; align-items: center; font-size: 20px; transition: 0.2s; }
-    .action-btn:hover .action-icon { background: var(--primary); color: white; transform: translateY(-3px); }
-    .action-btn span { font-size: 12px; font-weight: 500; color: #555; }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
-    .stat-card { background: white; border-radius: 14px; padding: 15px; border: 1px solid var(--border); }
-    .stat-card p { font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-card h3 { font-size: 16px; font-weight: bold; color: var(--text); }
-    .stat-card.untung h3 { color: #10b981; }
-
-    .chart-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
-    .chart-card h4 { margin-bottom: 15px; font-size: 14px; font-weight: bold; }
-    .chart-wrap { position: relative; height: 220px; }
-
-    /* LABA BERSIH */
-    .laba-card { background: linear-gradient(135deg, #064e3b, #10b981); border-radius: 16px; padding: 18px 20px; color: white; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 16px rgba(16,185,129,0.25); }
-    .laba-card .laba-info p { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
-    .laba-card .laba-info h3 { font-size: 22px; font-weight: bold; }
-    .laba-card .laba-sub { font-size: 11px; opacity: 0.75; text-align: right; line-height: 1.8; }
-
-    /* TOP PRODUK */
-    .top-produk-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-    .top-produk-item { display: flex; align-items: center; gap: 12px; background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border); }
-    .top-rank { width: 28px; height: 28px; border-radius: 50%; background: #e0e7ff; color: var(--primary); font-weight: bold; font-size: 13px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
-    .top-rank.gold { background: #fef3c7; color: #b45309; }
-    .top-rank.silver { background: #f1f5f9; color: #475569; }
-    .top-rank.bronze { background: #ffedd5; color: #9a3412; }
-    .top-info { flex: 1; }
-    .top-info h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-    .top-info p { font-size: 11px; color: #888; }
-    .top-bar-wrap { width: 70px; }
-    .top-bar-bg { background: #f1f5f9; border-radius: 4px; height: 6px; }
-    .top-bar-fill { background: var(--primary); border-radius: 4px; height: 6px; transition: width 0.5s; }
-    .top-qty { font-size: 13px; font-weight: bold; color: var(--primary); min-width: 28px; text-align: right; }
-
-    /* POS & KARTU PRODUK */
-    .topbar { background: white; padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; flex-shrink: 0; }
-    .search-bar { display: flex; align-items: center; background: var(--bg); padding: 10px 15px; border-radius: 8px; width: 100%; max-width: 400px; }
-    .search-bar input { border: none; background: transparent; outline: none; margin-left: 10px; width: 100%; font-size: 14px; }
-    .pos-container { display: flex; height: 100%; flex-direction: column; }
-    .pos-content { flex: 1; padding: 20px; overflow-y: auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-    .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: 0.2s; }
-    .card:active { transform: scale(0.97); }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .card-color-box { height: 90px; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; position: relative; }
-    .stok-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); color: var(--text); padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mustakim Mini ATM</title>
+    <!-- Font dan Ikon -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    /* PENYESUAIAN INFO PRODUK & HARGA/EDIT */
-    .card-info { padding: 12px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; }
-    .card-info h4 { font-size: 13px; font-weight: 600; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0; }
-    .id-badge { font-size: 11px; font-weight: 500; color: #888; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .price-edit { 
-      font-size: 14px; color: var(--primary); font-weight: bold; 
-      padding: 4px 10px; border-radius: 6px; transition: 0.2s; border: 1px dashed transparent;
-      display: inline-flex; align-items: center; gap: 5px;
-    }
-    .price-edit:hover { background: #e0e7ff; border-color: var(--primary); color: #1e3a8a; }
-
-    /* CART */
-    .cart-panel { width: 350px; background: white; border-left: 1px solid var(--border); display: flex; flex-direction: column; position: absolute; right: 0; top: 0; height: 100%; z-index: 100; }
-    .cart-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .cart-items { flex: 1; overflow-y: auto; padding: 20px; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .qty-control { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 5px; border-radius: 8px; }
-    .qty-btn { border: none; background: white; width: 25px; height: 25px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .cart-summary { padding: 20px; border-top: 1px solid var(--border); }
-    .btn-pay { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .btn-pay:disabled { background: #ccc; cursor: not-allowed; }
-    .btn-close-cart { display: none; cursor: pointer; font-size: 18px; }
-
-    /* METODE BAYAR */
-    .metode-bayar { display: flex; gap: 8px; margin-top: 12px; }
-    .metode-btn { flex: 1; padding: 8px 4px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 12px; font-weight: 600; cursor: pointer; color: #555; text-align: center; transition: 0.15s; }
-    .metode-btn.active { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
-
-    /* KEMBALIAN */
-    .kembalian-box { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: 8px; }
-    .kembalian-box label { font-size: 12px; color: #888; display: block; margin-bottom: 6px; }
-    .kembalian-box input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-weight: bold; }
-    .kembalian-result { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; }
-    .kembalian-result span:last-child { font-weight: bold; color: #10b981; }
-    .kembalian-result.kurang span:last-child { color: var(--c5); }
-
-    /* FORM & TABEL */
-    .input-group { margin-bottom: 15px; }
-    .input-group label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; }
-    .input-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
-    .table-wrapper { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-top: 15px; }
-    .styled-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-    .styled-table th, .styled-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-    .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 12px; }
-    .btn-icon-edit, .btn-icon-del { cursor: pointer; padding: 6px 8px; border-radius: 6px; }
-    .btn-icon-edit { color: var(--primary); }
-    .btn-icon-edit:hover { background: #e0e7ff; }
-    .btn-icon-del { color: var(--c5); }
-    .btn-icon-del:hover { background: #fee2e2; }
-    .btn-batal-edit { width: 100%; padding: 12px; background: #eee; color: var(--text); border: none; border-radius: 6px; font-weight: bold; margin-top: 10px; display: none; cursor: pointer; }
-
-    /* ERROR BANNER */
-    .error-banner { background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin: 0 0 15px 0; font-size: 13px; display: none; border: 1px solid #fecaca; }
-    .error-banner.show { display: block; }
-
-    /* FILTER */
-    .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
-    .filter-bar .input-group { margin-bottom: 0; flex: 1; min-width: 140px; }
-    .filter-bar button { padding: 0 18px; height: 42px; border: none; border-radius: 6px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-    .filter-bar button.secondary { background: #eee; color: var(--text); }
-    .filter-summary-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px 15px; font-size: 13px; margin-bottom: 15px; }
-
-    /* STRUK */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; justify-content: center; align-items: center; padding: 20px; }
-    .modal-overlay.show { display: flex; }
-    .struk-box { background: white; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; border-radius: 14px; padding: 20px; }
-    .struk-box h3 { text-align: center; color: var(--primary); }
-    .struk-sub { text-align: center; font-size: 11px; color: #888; margin: 4px 0 15px; }
-    .struk-divider { border-top: 1px dashed var(--border); margin: 12px 0; }
-    .struk-line { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; gap: 10px; }
-    .struk-line span:first-child { flex: 1; }
-    .struk-total { display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; }
-    .struk-actions { display: flex; gap: 10px; margin-top: 15px; }
-    .struk-actions button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    .btn-print { background: var(--primary); color: white; }
-    .btn-tutup-struk { background: #eee; color: var(--text); }
-
-    @media print {
-      body * { visibility: hidden; }
-      #struk-print-area, #struk-print-area * { visibility: visible; }
-      .modal-overlay { position: absolute; background: none; }
-      #struk-print-area { position: absolute; top: 0; left: 0; width: 100%; box-shadow: none; }
-      .struk-actions { display: none; }
-    }
-
-    /* =========================================
-       RESPONSIVE CSS (Standar & Mode Paksa HP)
-       ========================================= */
-
-    @media (min-width: 1025px) { 
-      .pos-content { padding-right: 370px; } 
-    }
-
-    /* 1. Aturan Responsive Normal */
-    @media (max-width: 1024px) {
-      .sidebar { display: none; }
-      .bottom-nav { display: flex; }
-      .view { padding-bottom: 80px; }
-      .topbar { padding: 10px; }
-      .search-bar { max-width: 100%; padding: 8px 12px; }
-      .pos-content { padding: 10px; padding-right: 10px; }
-      .grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-      .card { border-radius: 8px; }
-      .card-color-box { height: 45px; font-size: 16px; }
-      .stok-badge { top: 4px; right: 4px; font-size: 9px; padding: 2px 4px; }
-      
-      .card-info { padding: 8px; gap: 2px; }
-      .card-info h4 { font-size: 11px; }
-      .id-badge { font-size: 10px; margin-bottom: 2px; }
-      .price-edit { font-size: 11px; padding: 2px 6px; }
-      
-      .cart-panel { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; z-index: 2000; transition: 0.3s; padding-bottom: env(safe-area-inset-bottom, 15px); }
-      .cart-panel.mobile-open { right: 0; }
-      .btn-close-cart { display: block; }
-      .laba-card { flex-direction: column; gap: 10px; }
-      .laba-card .laba-sub { text-align: left; }
-    }
-
-    /* 2. OVERRIDE ANTI-GAGAL GOOGLE SITES (Dijalankan paksa oleh Skrip Deteksi Perangkat) */
-    .mode-hp .sidebar { display: none !important; }
-    .mode-hp .bottom-nav { display: flex !important; }
-    .mode-hp .view { padding-bottom: 80px !important; }
-    .mode-hp .topbar { padding: 10px !important; }
-    .mode-hp .search-bar { max-width: 100% !important; padding: 8px 12px !important; }
-    .mode-hp .pos-content { padding: 10px !important; padding-right: 10px !important; }
-    .mode-hp .grid { grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; }
-    .mode-hp .card { border-radius: 8px !important; }
-    .mode-hp .card-color-box { height: 45px !important; font-size: 16px !important; }
-    .mode-hp .stok-badge { top: 4px !important; right: 4px !important; font-size: 9px !important; padding: 2px 4px !important; }
+    <!-- PUSTAKA TESSERACT.JS UNTUK BACA GAMBAR KE TEKS -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     
-    .mode-hp .card-info { padding: 8px !important; gap: 2px !important; }
-    .mode-hp .card-info h4 { font-size: 11px !important; }
-    .mode-hp .id-badge { font-size: 10px !important; margin-bottom: 2px !important; }
-    .mode-hp .price-edit { font-size: 11px !important; padding: 2px 6px !important; }
-    
-    .mode-hp .cart-panel { position: fixed !important; top: 0 !important; right: -100% !important; width: 100% !important; height: 100% !important; z-index: 2000 !important; transition: 0.3s !important; padding-bottom: env(safe-area-inset-bottom, 15px) !important; }
-    .mode-hp .cart-panel.mobile-open { right: 0 !important; }
-    .mode-hp .btn-close-cart { display: block !important; }
-    .mode-hp .laba-card { flex-direction: column !important; gap: 10px !important; }
-    .mode-hp .laba-card .laba-sub { text-align: left !important; }
-  </style>
+    <style>
+        /* === VARIABEL WARNA (TEMA TERANG) === */
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-app: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --border-color: #e2e8f0;
+            --card-bg: #f8fafc;
+        }
+
+        /* === RESET & DASAR === */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); display: flex; justify-content: center; min-height: 100vh; color: var(--text-main); }
+        
+        /* Wadah Utama Aplikasi */
+        .app-container {
+            background-color: var(--bg-app);
+            width: 100%;
+            max-width: 480px; 
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            overflow-x: hidden;
+        }
+
+        /* === HEADER UTAMA === */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-app);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .brand-info { display: flex; align-items: center; gap: 12px; }
+        .logo-box { background: #e0e7ff; color: var(--primary); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .brand-text h1 { font-size: 14px; font-weight: 700; line-height: 1.2; text-transform: uppercase; }
+        .brand-text p { font-size: 11px; color: var(--text-muted); }
+        
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-icon { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 5px; }
+        .btn-printer { background: #eff6ff; border: 1px solid #bfdbfe; color: var(--primary); font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;}
+        .btn-printer:active { background: #dbeafe; }
+        .btn-printer.connected { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+        .btn-printer:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* === HALAMAN SCAN & HASIL === */
+        .page { flex: 1; overflow-y: auto; padding-bottom: 80px; display: flex; flex-direction: column; }
+        .page.hidden { display: none; }
+        
+        /* === CHIP JENIS TRANSAKSI === */
+        .chip-jenis {
+            flex-shrink: 0;
+            display: flex; align-items: center; gap: 6px;
+            padding: 9px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .chip-jenis.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .upload-section { padding: 20px; display: flex; flex-direction: column; }
+        .upload-card {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .upload-icon { width: 50px; height: 50px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; }
+        
+        /* Tombol Upload */
+        .btn-group { display: flex; gap: 10px; width: 100%; }
+        .btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* === TABS UNTUK EDIT & PREVIEW === */
+        #result-section { display: none; flex-direction: column; flex: 1; }
+        .tabs { display: flex; background: var(--bg-body); padding: 5px; margin: 0 20px 15px 20px; border-radius: 10px; }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* Area Edit Data */
+        .edit-form { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; color: var(--text-main); background: #fff; font-family: 'Inter', sans-serif;}
+        .form-group input:focus { outline: none; border-color: var(--primary); }
+
+        /* === PREVIEW STRUK THERMAL === */
+        .preview-container { padding: 0 20px 20px 20px; display: none; flex-direction: column; align-items: center; }
+        .receipt-paper {
+            background: white;
+            width: 100%;
+            max-width: 280px;
+            padding: 20px 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: #000;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+        .receipt-center { text-align: center; margin-bottom: 10px; }
+        .receipt-center h3 { font-size: 13px; font-weight: bold; margin-bottom: 2px; letter-spacing: 0.3px; }
+        .receipt-center p { font-size: 11px; }
+        .receipt-line { border-top: 1px dashed #94a3b8; margin: 8px 0; }
+        .receipt-row { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+        .receipt-row.bold { font-weight: bold; font-size: 12px; margin-top: 8px; }
+        .receipt-col { display: flex; flex-direction: column; text-align: right;}
+        .receipt-row span:last-child { text-align: right; word-break: break-word; }
+
+        /* Loader Overlay */
+        .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;}
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Toast notifikasi ringan (pengganti alert yang mengganggu) */
+        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #0f172a; color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; z-index: 100; opacity: 0; transition: 0.3s; max-width: 90%; text-align: center; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: #dc2626; }
+        .toast.success { background: #059669; }
+
+        /* === RIWAYAT TRANSAKSI === */
+        .riwayat-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; }
+        .riwayat-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .riwayat-nominal { font-weight: 700; font-size: 15px; color: var(--primary); }
+        .riwayat-tanggal { font-size: 11px; color: var(--text-muted); }
+        .riwayat-detail { font-size: 12px; color: var(--text-main); line-height: 1.5; }
+        .riwayat-detail b { color: var(--text-muted); font-weight: 600; }
+
+        /* === NAVIGASI BAWAH === */
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--bg-app); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0; z-index: 20; padding-bottom: env(safe-area-inset-bottom, 10px); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 500; cursor: pointer; flex: 1; }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--primary); }
+    </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <div class="logo"><i class="fas fa-bolt"></i> MUSTAKIM PHONE</div>
-  <div class="nav-link active" onclick="switchView('dash')" data-target="dash"><i class="fas fa-home"></i> Dashboard</div>
-  <div class="nav-link" onclick="switchView('pos')" data-target="pos"><i class="fas fa-cash-register"></i> POS Kasir</div>
-  <div class="nav-link" onclick="switchView('tx')" data-target="tx"><i class="fas fa-receipt"></i> Riwayat</div>
-  <div class="nav-link" onclick="switchView('prod')" data-target="prod"><i class="fas fa-box"></i> Produk</div>
-  <div class="nav-link" onclick="switchView('keluar')" data-target="keluar"><i class="fas fa-wallet"></i> Pengeluaran</div>
-</div>
-
-<div class="main">
-
-  <!-- DASHBOARD -->
-  <div id="view-dash" class="view active">
-    <div class="dashboard-content">
-      <div class="error-banner" id="global-error"></div>
-
-      <div class="dash-header">
-        <div class="user-profile">
-          <div class="avatar">M</div>
-          <div class="greeting">
-            <p>Selamat Datang,</p>
-            <h4>MUSTAKIM PHONE</h4>
-          </div>
+    <div class="app-container">
+        
+        <!-- LOADER -->
+        <div class="loader-overlay" id="loader">
+            <div class="spinner"></div>
+            <h3 id="loader-title" style="font-size: 16px; color: var(--text-main);">Memproses Gambar...</h3>
+            <p id="loader-sub" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">AI sedang membaca teks pada struk</p>
         </div>
-        <i class="fas fa-bell bell-icon"></i>
-      </div>
 
-      <div class="earning-card">
-        <p>Total Keuntungan Bersih</p>
-        <h2 id="dash-total-earning">Rp 0</h2>
-      </div>
+        <!-- TOAST NOTIFIKASI -->
+        <div class="toast" id="toast"></div>
 
-      <div class="dash-section-title">Akses Cepat</div>
-      <div class="quick-actions">
-        <div class="action-btn" onclick="switchView('pos')"><div class="action-icon"><i class="fas fa-cash-register"></i></div><span>Kasir</span></div>
-        <div class="action-btn" onclick="switchView('prod')"><div class="action-icon"><i class="fas fa-box"></i></div><span>Produk</span></div>
-        <div class="action-btn" onclick="switchView('tx')"><div class="action-icon"><i class="fas fa-file-invoice"></i></div><span>Riwayat</span></div>
-        <div class="action-btn" onclick="switchView('keluar')"><div class="action-icon"><i class="fas fa-mobile-alt"></i></div><span>Lainnya</span></div>
-      </div>
-
-      <div class="dash-section-title">Ringkasan Periode</div>
-      <div class="stats-grid">
-        <div class="stat-card"><p>Omzet Hari Ini</p><h3 id="stat-omzet-hari">Rp 0</h3></div>
-        <div class="stat-card untung"><p>Untung Hari Ini</p><h3 id="stat-untung-hari">Rp 0</h3></div>
-        <div class="stat-card"><p>Omzet Minggu Ini</p><h3 id="stat-omzet-minggu">Rp 0</h3></div>
-        <div class="stat-card untung"><p>Untung Minggu Ini</p><h3 id="stat-untung-minggu">Rp 0</h3></div>
-        <div class="stat-card"><p>Omzet Bulan Ini</p><h3 id="stat-omzet-bulan">Rp 0</h3></div>
-        <div class="stat-card untung"><p>Untung Bulan Ini</p><h3 id="stat-untung-bulan">Rp 0</h3></div>
-      </div>
-
-      <div class="chart-card">
-        <h4>Grafik Penjualan — 7 Hari Terakhir</h4>
-        <div class="chart-wrap"><canvas id="grafikPenjualan"></canvas></div>
-      </div>
-
-      <div class="laba-card">
-        <div class="laba-info">
-          <p>Laba Bersih Bulan Ini</p>
-          <h3 id="dash-laba-internal">Rp 0</h3>
-        </div>
-        <div class="laba-sub">
-          Untung: <span id="laba-untung-sub">Rp 0</span><br>
-          Pengeluaran: <span id="laba-keluar-sub">Rp 0</span>
-        </div>
-      </div>
-
-      <div class="dash-section-title">Produk Terlaris</div>
-      <div class="top-produk-list" id="top-produk-list">
-        <p style="text-align:center; color:#888; font-size:13px;">Memuat...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- POS KASIR -->
-  <div id="view-pos" class="view">
-    <div class="topbar">
-      <div class="search-bar">
-        <i class="fas fa-search" style="color:#888;"></i>
-        <input type="text" id="searchInput" placeholder="Cari ID atau nama produk..." onkeyup="cariProduk()">
-      </div>
-    </div>
-    <div class="pos-container">
-      <div class="pos-content">
-        <div class="grid" id="grid-produk">Memuat produk...</div>
-      </div>
-      <div class="cart-panel" id="cartPanel">
-        <div class="cart-header">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-arrow-left btn-close-cart" onclick="toggleCart()"></i>
-            <h3>Keranjang</h3>
-          </div>
-          <span style="color:#888; cursor:pointer; font-size:14px;" onclick="kosongkanCart()">Batal</span>
-        </div>
-        <div class="cart-items" id="area-keranjang">
-          <div style="text-align:center; color:#ccc; margin-top:50px;"><i class="fas fa-shopping-cart fa-3x"></i><p>Kosong</p></div>
-        </div>
-        <div class="cart-summary">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; font-size:18px;">
-            <span>Total</span><span id="txt-total">Rp 0</span>
-          </div>
-          <div class="metode-bayar" id="metode-bayar-box" style="display:none;">
-            <button class="metode-btn active" onclick="pilihMetode('Tunai')" id="mb-tunai"><i class="fas fa-money-bill-wave"></i> Tunai</button>
-            <button class="metode-btn" onclick="pilihMetode('Transfer')" id="mb-transfer"><i class="fas fa-university"></i> Transfer</button>
-            <button class="metode-btn" onclick="pilihMetode('QRIS')" id="mb-qris"><i class="fas fa-qrcode"></i> QRIS</button>
-          </div>
-          <div class="kembalian-box" id="kembalian-box" style="display:none;">
-            <label>Uang Diterima (Rp)</label>
-            <input type="number" id="input-bayar" placeholder="0" oninput="hitungKembalian()">
-            <div class="kembalian-result" id="kembalian-result">
-              <span>Kembalian</span><span id="txt-kembalian">Rp 0</span>
+        <!-- MODAL RAW OCR (untuk debug/copy teks mentah hasil pembacaan) -->
+        <div id="raw-ocr-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:200; align-items:center; justify-content:center; padding:20px;">
+            <div style="background:white; border-radius:14px; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column; overflow:hidden;">
+                <div style="padding:15px 18px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="font-size:14px;">Teks Mentah Hasil OCR</strong>
+                    <button onclick="document.getElementById('raw-ocr-modal').style.display='none'" style="border:none; background:none; font-size:18px; cursor:pointer; color:var(--text-muted);">&times;</button>
+                </div>
+                <textarea id="raw-ocr-text" readonly style="flex:1; padding:15px; border:none; font-family:'Space Mono',monospace; font-size:12px; resize:none; min-height:200px;"></textarea>
+                <div style="padding:12px 18px; border-top:1px solid var(--border-color);">
+                    <button class="btn btn-primary" style="width:100%;" onclick="copyRawOcrText()">
+                        <i class="fa-solid fa-copy"></i> Salin Teks
+                    </button>
+                </div>
             </div>
-          </div>
-          <button class="btn-pay" id="btn-bayar" onclick="prosesBayar()" disabled>Bayar</button>
         </div>
-      </div>
+
+        <header class="header">
+            <div class="brand-info">
+                <div class="logo-box"><i class="fa-solid fa-receipt"></i></div>
+                <div class="brand-text">
+                    <h1>ATM MINI</h1>
+                    <p>Cetak Struk Transfer</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-printer" id="btn-printer" onclick="printReceiptBluetooth()">
+                    <i class="fa-brands fa-bluetooth"></i> <span id="printer-label">Printer</span>
+                </button>
+                <button class="btn-icon"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </header>
+
+        <div id="page-scan" class="page">
+            
+            <!-- SECTION 0: PILIH JENIS TRANSAKSI -->
+            <div class="upload-section" style="padding-bottom: 0;">
+                <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block;">Jenis Transaksi</label>
+                <div id="jenis-transaksi-group" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 5px;">
+                    <button type="button" class="chip-jenis active" data-jenis="transfer" onclick="pilihJenisTransaksi('transfer', this)">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Transfer Bank
+                    </button>
+                    <button type="button" class="chip-jenis" data-jenis="ewallet" onclick="pilihJenisTransaksi('ewallet', this)">
+                        <i class="fa-solid fa-wallet"></i> Topup E-Wallet
+                    </button>
+                    <button type="button" class="chip-jenis" data-jenis="tagihan" onclick="pilihJenisTransaksi('tagihan', this)">
+                        <i class="fa-solid fa-file-invoice"></i> Bayar Tagihan
+                    </button>
+                    <button type="button" class="chip-jenis" data-jenis="lainnya" onclick="pilihJenisTransaksi('lainnya', this)">
+                        <i class="fa-solid fa-ellipsis"></i> Lainnya
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 1: UPLOAD GAMBAR -->
+            <div class="upload-section">
+                <div class="upload-card">
+                    <img id="image-preview" style="display: none; width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);" alt="Preview Struk" />
+                    
+                    <div id="upload-placeholder">
+                        <div class="upload-icon"><i class="fa-regular fa-image"></i></div>
+                        <h2 style="font-size: 16px; font-weight: 700;">Upload Bukti Transfer</h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0 15px 0;">Foto screenshot bukti transfer (BRImo, BCA, Mandiri, dll)</p>
+                    </div>
+
+                    <input type="file" id="kamera-input" accept="image/*" capture="environment" style="display: none;">
+                    <input type="file" id="galeri-input" accept="image/*" style="display: none;">
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="document.getElementById('kamera-input').click()">
+                            <i class="fa-solid fa-camera"></i> Kamera
+                        </button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('galeri-input').click()">
+                            <i class="fa-solid fa-upload"></i> Galeri
+                        </button>
+                    </div>
+                    <button id="btn-raw-ocr" class="btn btn-secondary" style="display: none; margin-top: 10px; font-size: 11px; padding: 8px;" onclick="showRawOcrModal()">
+                        <i class="fa-solid fa-bug"></i> Lihat Teks Mentah Hasil OCR
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 2: HASIL OCR (EDIT & PREVIEW) -->
+            <div id="result-section">
+                <div class="tabs">
+                    <div class="tab-btn active" onclick="switchTab('edit', this)"><i class="fa-solid fa-pen"></i> Edit Data</div>
+                    <div class="tab-btn" onclick="switchTab('preview', this)"><i class="fa-solid fa-eye"></i> Pratinjau Struk</div>
+                </div>
+
+                <!-- TAB EDIT DATA -->
+                <div id="tab-edit" class="edit-form">
+                    <div class="form-group">
+                        <label>Tanggal & Waktu</label>
+                        <input type="text" id="in-tanggal" placeholder="17/06/2026 13:43">
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor Referensi</label>
+                        <input type="text" id="in-ref" placeholder="161267832073">
+                    </div>
+
+                    <div style="border-left: 3px solid var(--primary); padding-left: 10px; margin-top: 10px;">
+                        <div class="form-group"><label id="label-pengirim-nama">Nama Pengirim</label><input type="text" id="in-pengirim-nama"></div>
+                        <div class="form-group" style="margin-top: 8px;"><label id="label-pengirim-rek">Rekening Pengirim</label><input type="text" id="in-pengirim-rek"></div>
+                    </div>
+
+                    <div style="border-left: 3px solid #10b981; padding-left: 10px; margin-top: 10px;">
+                        <div class="form-group"><label id="label-tujuan-nama">Nama Tujuan</label><input type="text" id="in-tujuan-nama"></div>
+                        <div class="form-group" style="margin-top: 8px;"><label id="label-tujuan-rek">Rekening Tujuan</label><input type="text" id="in-tujuan-rek"></div>
+                        <div class="form-group" style="margin-top: 8px;"><label id="label-tujuan-bank">Bank Tujuan</label><input type="text" id="in-tujuan-bank" value="BANK BRI"></div>
+                        <!-- Field khusus jenis "Bayar Tagihan": No. Pelanggan/ID. Disembunyikan untuk jenis lain. -->
+                        <div class="form-group" id="group-no-pelanggan" style="margin-top: 8px; display: none;">
+                            <label>No. Pelanggan / ID</label>
+                            <input type="text" id="in-no-pelanggan" placeholder="123456789012">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Nominal (Rp)</label>
+                        <input type="text" id="in-nominal" inputmode="numeric" placeholder="50000">
+                    </div>
+                    <div class="form-group">
+                        <label>Biaya Admin (Rp)</label>
+                        <input type="text" id="in-admin" inputmode="numeric" value="0">
+                    </div>
+                </div>
+
+                <!-- TAB PREVIEW STRUK -->
+                <div id="tab-preview" class="preview-container">
+                    <div class="receipt-paper" id="printable-receipt">
+                        <div class="receipt-center">
+                            <h3>MUSTAKIM MINI ATM</h3>
+                            <p style="margin-top: 5px;">BUKTI TRANSFER</p>
+                        </div>
+                        <div class="receipt-line"></div>
+                        <div class="receipt-row"><span>Tanggal</span><span id="out-tanggal">--/--/---- --:--</span></div>
+                        <div class="receipt-row"><span>No. Referensi</span><span id="out-ref" style="text-align: right; word-break: break-all; max-width: 60%;">--</span></div>
+                        
+                        <div class="receipt-line"></div>
+                        <div class="receipt-row" style="margin-bottom: 5px;"><span id="label-out-pengirim">PENGIRIM</span></div>
+                        <div class="receipt-row"><span>Nama</span><span id="out-pengirim-nama" style="text-align: right;">--</span></div>
+                        <div class="receipt-row"><span>Rekening</span><span id="out-pengirim-rek" style="text-align: right;">--</span></div>
+                        
+                        <div class="receipt-line"></div>
+                        <div class="receipt-row" style="margin-bottom: 5px;"><span id="label-out-tujuan">PENERIMA</span></div>
+                        <div class="receipt-row"><span>Nama</span><span id="out-tujuan-nama" style="text-align: right; max-width: 65%;">--</span></div>
+                        <div class="receipt-row"><span>Rekening</span><span id="out-tujuan-rek" style="text-align: right;">--</span></div>
+                        <div class="receipt-row"><span>Bank</span><span id="out-tujuan-bank" style="text-align: right;">--</span></div>
+                        <!-- No. Pelanggan/Token ditampilkan menonjol (besar+tebal+
+                             letter-spacing lebar) karena ini sering jadi nomor yang
+                             perlu disalin/dibaca ulang oleh pelanggan, terutama
+                             untuk token listrik PLN. -->
+                        <div id="block-out-no-pelanggan" style="display: none; text-align: center; margin: 10px 0; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                            <div style="font-size: 10px; color: #64748b; margin-bottom: 3px;">No. Pelanggan / Token</div>
+                            <div id="out-no-pelanggan" style="font-weight: 700; font-size: 15px; letter-spacing: 1.5px;">--</div>
+                        </div>
+                        
+                        <div class="receipt-line"></div>
+                        <div class="receipt-row"><span>Nominal</span><span id="out-nominal">Rp 0</span></div>
+                        <div class="receipt-row"><span>Biaya Admin</span><span id="out-admin">Rp 0</span></div>
+                        <div class="receipt-row bold"><span>TOTAL</span><span id="out-total">Rp 0</span></div>
+                        
+                        <div class="receipt-line"></div>
+                        <div class="receipt-center" style="margin-top: 20px; color: #475569;">
+                            <p>Transaksi berhasil</p>
+                            <p>Terima kasih telah menggunakan<br>layanan kami</p>
+                            <p style="margin-top:10px">==============================</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; width: 100%; max-width: 280px; margin-top: 15px;">
+                        <button class="btn btn-secondary" style="flex: 1;" onclick="simpanKeRiwayat()">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan
+                        </button>
+                        <button class="btn" style="flex: 1; background: #25D366; color: white;" onclick="shareKeWhatsApp()">
+                            <i class="fa-brands fa-whatsapp"></i> Share WA
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- HALAMAN RIWAYAT -->
+        <div id="page-riwayat" class="page hidden">
+            <div style="padding: 20px;">
+                <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 15px;">Riwayat Transaksi</h2>
+                <div id="riwayat-loading" style="text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 13px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Memuat riwayat...
+                </div>
+                <div id="riwayat-empty" style="display: none; text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <i class="fa-regular fa-folder-open" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                    <p style="font-size: 13px;">Belum ada transaksi tersimpan.</p>
+                </div>
+                <div id="riwayat-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- NAVIGASI BAWAH -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" id="nav-pindai" onclick="switchPage('scan')">
+                <i class="fa-solid fa-expand"></i>
+                <span>Pindai</span>
+            </div>
+            <div class="nav-item" id="nav-riwayat" onclick="switchPage('riwayat')">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Riwayat</span>
+            </div>
+        </nav>
+
     </div>
-  </div>
 
-  <!-- RIWAYAT -->
-  <div id="view-tx" class="view">
-    <div class="dashboard-content">
-      <h2 style="color:var(--primary);">Semua Riwayat Transaksi</h2><br>
-      <div class="filter-bar">
-        <div class="input-group"><label>Dari Tanggal</label><input type="date" id="filter-dari"></div>
-        <div class="input-group"><label>Sampai Tanggal</label><input type="date" id="filter-sampai"></div>
-        <button onclick="terapkanFilterTx()">Filter</button>
-        <button class="secondary" onclick="filterHariIni()">Hari Ini</button>
-        <button class="secondary" onclick="resetFilterTx()">Reset</button>
-      </div>
-      <div class="filter-summary-box" id="filter-summary" style="display:none;"></div>
-      <div class="table-wrapper">
-        <table class="styled-table">
-          <thead><tr><th>Waktu</th><th>Nama Produk</th><th>Qty</th><th>Untung</th><th>Metode</th></tr></thead>
-          <tbody id="tabel-tx"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+    <!-- SCRIPT LOGIKA APLIKASI -->
+    <script>
+        // ===================================================================
+        // KONFIGURASI API (Google Apps Script Web App)
+        // ===================================================================
+        // Ganti URL ini dengan URL deployment Web App Apps Script Anda
+        // (Deploy -> Manage deployments -> salin "Web app URL").
+        // URL harus diakhiri "/exec", BUKAN "/dev".
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyelWPHqoyS8FyL86IOOziHJADaWLhRrmWGYjMEclcr4iEsC0DX7j9FkES5A8wiHwxz/exec';
 
-  <!-- PRODUK -->
-  <div id="view-prod" class="view">
-    <div class="dashboard-content">
-      <h2>Kelola Produk</h2><br>
-      <div style="background:white; padding:20px; border-radius:12px; max-width:400px; border:1px solid var(--border);">
-        <div class="input-group"><label>ID Produk</label><input type="text" id="p-id"></div>
-        <div class="input-group"><label>Nama</label><input type="text" id="p-nama"></div>
-        <div class="input-group"><label>Jenis / Kategori</label><input type="text" id="p-jenis" placeholder="Contoh: SALDO DANA, TOKEN LISTRIK..."></div>
-        <div class="input-group"><label>Harga Modal</label><input type="number" id="p-modal"></div>
-        <div class="input-group"><label>Harga Jual</label><input type="number" id="p-jual"></div>
-        <div class="input-group"><label>Stok</label><input type="number" id="p-stok" value="100"></div>
-        <button id="btn-simpan-prod" onclick="saveProd()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:bold;">Simpan Data</button>
-        <button id="btn-batal-edit" class="btn-batal-edit" onclick="batalEdit()">Batal Edit</button>
-      </div>
-      <br>
-      <h3 style="margin-bottom:10px;">Daftar Produk</h3>
-      <div class="table-wrapper">
-        <table class="styled-table">
-          <thead><tr><th>ID</th><th>Nama</th><th>Jenis</th><th>Harga Jual</th><th>Stok</th><th>Aksi</th></tr></thead>
-          <tbody id="tabel-produk"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- PENGELUARAN -->
-  <div id="view-keluar" class="view">
-    <div class="dashboard-content">
-      <h2 style="color:var(--c5);">Pengeluaran</h2><br>
-      <div style="background:white; padding:20px; border-radius:12px; max-width:400px; border:1px solid var(--border);">
-        <div class="input-group"><label>Tanggal</label><input type="date" id="k-tanggal"></div>
-        <div class="input-group"><label>Jenis</label><input type="text" id="k-jenis" placeholder="Sewa Ruko, Listrik, dll…"></div>
-        <div class="input-group"><label>Keterangan</label><input type="text" id="k-ket" placeholder="Detail pengeluaran"></div>
-        <div class="input-group"><label>Jumlah (Rp)</label><input type="number" id="k-jumlah" placeholder="0"></div>
-        <button id="btn-simpan-keluar" onclick="simpanPengeluaranHandler()" style="width:100%; padding:12px; background:var(--c5); color:white; border:none; border-radius:6px; font-weight:bold;">Simpan Pengeluaran</button>
-      </div>
-      <div class="stats-grid" style="margin-top:20px;">
-        <div class="stat-card" style="border-left:4px solid var(--c5);"><p>Pengeluaran Bulan Ini</p><h3 id="stat-keluar-bulan" style="color:var(--c5);">Rp 0</h3></div>
-        <div class="stat-card" style="border-left:4px solid var(--c4);"><p>Total Pengeluaran</p><h3 id="stat-keluar-total" style="color:var(--c4);">Rp 0</h3></div>
-      </div>
-      <h3 style="margin:20px 0 10px;">Riwayat Pengeluaran</h3>
-      <div class="table-wrapper">
-        <table class="styled-table">
-          <thead><tr><th>Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Jumlah</th><th>Aksi</th></tr></thead>
-          <tbody id="tabel-keluar"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="bottom-nav-item active" onclick="switchView('dash')" data-target="dash"><i class="fas fa-home"></i><span class="label">Home</span></div>
-  <div class="bottom-nav-item" onclick="switchView('pos')" data-target="pos"><i class="fas fa-cash-register"></i><span class="label">Kasir</span></div>
-  <div class="bottom-nav-item" onclick="switchView('keluar')" data-target="keluar"><i class="fas fa-wallet"></i><span class="label">Keluar</span></div>
-  <div class="bottom-nav-item" onclick="switchView('tx')" data-target="tx"><i class="fas fa-receipt"></i><span class="label">Riwayat</span></div>
-  <div class="bottom-nav-item" onclick="toggleCart()"><i class="fas fa-shopping-bag"></i><span class="label">Keranjang</span><span class="cart-badge" id="cart-badge">0</span></div>
-</div>
-
-<!-- STRUK MODAL -->
-<div class="modal-overlay" id="struk-overlay">
-  <div class="struk-box" id="struk-print-area">
-    <h3>MUSTAKIM PHONE</h3>
-    <p class="struk-sub" id="struk-waktu"></p>
-    <div class="struk-divider"></div>
-    <div id="struk-items"></div>
-    <div class="struk-divider"></div>
-    <div class="struk-total"><span>Total</span><span id="struk-total-harga">Rp 0</span></div>
-    <div id="struk-ekstra"></div>
-    <div class="struk-actions">
-      <button class="btn-tutup-struk" onclick="tutupStruk()">Tutup</button>
-      <button class="btn-print" onclick="window.print()">Cetak</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ── STATE ──────────────────────────────────────────
-  let dbProduk = [], dbTransaksi = [], dbPengeluaran = [];
-  let keranjang = [];
-  let editingProdukId = null;
-  let metodeBayar = 'Tunai';
-  let grafikInstance = null;
-  const warnaWarni = ['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)'];
-  const BULAN_MAP = { 'Januari':0,'Februari':1,'Maret':2,'April':3,'Mei':4,'Juni':5,'Juli':6,'Agustus':7,'September':8,'Oktober':9,'November':10,'Desember':11 };
-
-  // ── HELPERS ───────────────────────────────────────
-  function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  function rp(n) { return 'Rp ' + (Number(n)||0).toLocaleString('id-ID'); }
-
-  function parseTanggalIndo(str) {
-    const m = String(str).match(/(\d{1,2})\s+(\w+)\s+(\d{4}),\s*(\d{2})\.(\d{2})/);
-    if (!m) return null;
-    const bulan = BULAN_MAP[m[2]];
-    if (bulan === undefined) return null;
-    return new Date(+m[3], bulan, +m[1], +m[4], +m[5]);
-  }
-  function parseTanggalPengeluaran(str) {
-    if (!str) return null;
-    if (/^\d{4}-\d{2}-\d{2}/.test(str)) return new Date(str);
-    const m = String(str).match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
-    if (!m) return null;
-    const bulan = BULAN_MAP[m[2]];
-    if (bulan === undefined) return null;
-    return new Date(+m[3], bulan, +m[1]);
-  }
-  function formatTanggalPengeluaran(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    const H = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const B = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    return `${H[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')} ${B[d.getMonth()]} ${d.getFullYear()}`;
-  }
-  function awalHari(d)   { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-  function awalMinggu(d) { const day=d.getDay(); const diff=day===0?-6:1-day; return awalHari(new Date(d.getFullYear(),d.getMonth(),d.getDate()+diff)); }
-  function awalBulan(d)  { return new Date(d.getFullYear(), d.getMonth(), 1); }
-
-  function tampilkanError(msg) { const b=document.getElementById('global-error'); b.innerText=msg; b.classList.add('show'); }
-  function sembunyikanError()  { document.getElementById('global-error').classList.remove('show'); }
-
-  // ── PENDETEKSI WARNA PRODUK ───────────────────────
-  function getWarnaProduk(nama, jenis, index) {
-    const text = (nama + ' ' + (jenis || '')).toLowerCase();
-    
-    if (text.includes('dana')) return '#118ee6';
-    if (text.includes('ovo')) return '#4c3494';
-    if (text.includes('spay') || text.includes('shopee')) return '#ee4d2d';
-    if (text.includes('gopay')) return '#00aed6';
-    if (text.includes('linkaja')) return '#e3242b';
-    if (text.includes('transfer')) return '#1e3a8a';
-    if (text.includes('tarik')) return '#0f766e';
-    if (text.includes('pulsa') || text.includes('data')) return '#0ea5e9';
-    if (text.includes('pln') || text.includes('token')) return '#f59e0b';
-    if (text.includes('pisang') || text.includes('snack')) return '#eab308';
-    
-    return warnaWarni[index % warnaWarni.length];
-  }
-
-  // ── NAVIGASI ──────────────────────────────────────
-  function switchView(id) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + id).classList.add('active');
-    document.querySelectorAll('.nav-link, .bottom-nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll(`[data-target="${id}"]`).forEach(n => n.classList.add('active'));
-    document.getElementById('cartPanel').classList.remove('mobile-open');
-    if (id === 'keluar') muatPengeluaran();
-  }
-  function toggleCart() { document.getElementById('cartPanel').classList.toggle('mobile-open'); }
-
-  // ── INIT ─────────────────────────────────────────
-  function initApp() {
-    sembunyikanError();
-    google.script.run
-      .withSuccessHandler(res => {
-        dbProduk = res.produk;
-        dbTransaksi = res.transaksi;
-        renderGrid(dbProduk);
-        renderDashboard();
-        renderTabelProduk();
-        const fd = document.getElementById('filter-dari').value;
-        const fs = document.getElementById('filter-sampai').value;
-        fd || fs ? terapkanFilterTx() : loadTxTabel(dbTransaksi);
-        muatPengeluaran();
-      })
-      .withFailureHandler(err => {
-        const msg = 'Gagal memuat data: ' + (err?.message || err);
-        tampilkanError(msg);
-        document.getElementById('grid-produk').innerHTML =
-          `<div style="grid-column:1/-1;text-align:center;color:var(--c5);padding:20px;">${esc(msg)}</div>`;
-      })
-      .ambilData();
-  }
-
-  // ── DASHBOARD ─────────────────────────────────────
-  function renderDashboard() {
-    const now = new Date();
-    const batasHari = awalHari(now), batasMinggu = awalMinggu(now), batasBulan = awalBulan(now);
-
-    let totalUntung=0, omzetHari=0, untungHari=0, omzetMinggu=0, untungMinggu=0, omzetBulan=0, untungBulan=0;
-    const HARI_NAMA = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-    const hari7 = Array.from({length:7}, (_,i) => {
-      const tgl = new Date(now.getFullYear(), now.getMonth(), now.getDate()-6+i);
-      return { label: HARI_NAMA[tgl.getDay()], omzet:0, untung:0, awal: awalHari(tgl) };
-    });
-
-    dbTransaksi.forEach(r => {
-      const tgl = parseTanggalIndo(r[0]);
-      if (!tgl) return;
-      const omz = (Number(r[3])||0) * (Number(r[4])||0);
-      const unt = Number(r[5])||0;
-      totalUntung += unt;
-      if (tgl >= batasHari)   { omzetHari   += omz; untungHari   += unt; }
-      if (tgl >= batasMinggu) { omzetMinggu += omz; untungMinggu += unt; }
-      if (tgl >= batasBulan)  { omzetBulan  += omz; untungBulan  += unt; }
-      for (const b of hari7) {
-        const end = new Date(b.awal.getFullYear(), b.awal.getMonth(), b.awal.getDate()+1);
-        if (tgl >= b.awal && tgl < end) { b.omzet += omz; b.untung += unt; break; }
-      }
-    });
-
-    document.getElementById('dash-total-earning').innerText = rp(totalUntung);
-    document.getElementById('stat-omzet-hari').innerText    = rp(omzetHari);
-    document.getElementById('stat-untung-hari').innerText   = rp(untungHari);
-    document.getElementById('stat-omzet-minggu').innerText  = rp(omzetMinggu);
-    document.getElementById('stat-untung-minggu').innerText = rp(untungMinggu);
-    document.getElementById('stat-omzet-bulan').innerText   = rp(omzetBulan);
-    document.getElementById('stat-untung-bulan').innerText  = rp(untungBulan);
-
-    // Laba bersih bulan ini
-    const totalKeluarBulan = dbPengeluaran.reduce((s,r) => {
-      const t = parseTanggalPengeluaran(r[0]);
-      return s + ((t && t >= batasBulan) ? (Number(r[3])||0) : 0);
-    }, 0);
-    
-    const elLaba = document.getElementById('dash-laba-internal');
-    if (elLaba) elLaba.innerText = rp(untungBulan - totalKeluarBulan);
-    
-    document.getElementById('laba-untung-sub').innerText   = rp(untungBulan);
-    document.getElementById('laba-keluar-sub').innerText   = rp(totalKeluarBulan);
-
-    // Top 5 produk terlaris
-    const map = {};
-    dbTransaksi.forEach(r => {
-      const id = String(r[1]), nama = String(r[2]);
-      const qty = Number(r[4])||0, omz = (Number(r[3])||0)*qty;
-      if (!map[id]) map[id] = { nama, qty:0, omzet:0 };
-      map[id].qty += qty; map[id].omzet += omz;
-    });
-    const top = Object.values(map).sort((a,b) => b.qty-a.qty).slice(0,5);
-    const maxQty = top[0]?.qty || 1;
-    const rankCls = ['gold','silver','bronze','',''];
-    document.getElementById('top-produk-list').innerHTML = top.length === 0
-      ? '<p style="text-align:center;color:#888;font-size:13px;">Belum ada data penjualan</p>'
-      : top.map((p,i) => `
-        <div class="top-produk-item">
-          <div class="top-rank ${rankCls[i]}">${i+1}</div>
-          <div class="top-info"><h4>${esc(p.nama)}</h4><p>Omzet: ${rp(p.omzet)}</p></div>
-          <div class="top-bar-wrap"><div class="top-bar-bg"><div class="top-bar-fill" style="width:${Math.round(p.qty/maxQty*100)}%"></div></div></div>
-          <div class="top-qty">${p.qty}</div>
-        </div>`).join('');
-
-    // Grafik
-    const ctx = document.getElementById('grafikPenjualan').getContext('2d');
-    if (grafikInstance) grafikInstance.destroy();
-    grafikInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: hari7.map(h => h.label),
-        datasets: [
-          { label:'Omzet', data: hari7.map(h=>h.omzet), backgroundColor:'rgba(59,130,246,0.7)', borderRadius:6, order:2 },
-          { label:'Untung', data: hari7.map(h=>h.untung), type:'line', borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', pointBackgroundColor:'#10b981', tension:0.4, fill:true, order:1 }
-        ]
-      },
-      options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins: {
-          legend: { position:'bottom', labels:{ font:{size:12}, boxWidth:12 } },
-          tooltip: { callbacks: { label: c => c.dataset.label+': '+rp(c.parsed.y) } }
-        },
-        scales: {
-          y: { beginAtZero:true, grid:{color:'#f0f0f0'}, ticks:{ font:{size:11}, callback: v => v>=1000000?(v/1000000).toFixed(1)+'jt':v>=1000?(v/1000).toFixed(0)+'rb':v } },
-          x: { grid:{display:false}, ticks:{font:{size:12}} }
+        // ===================================================================
+        // 0. TOAST NOTIFIKASI (pengganti alert() yang memblokir UI)
+        // ===================================================================
+        let toastTimer = null;
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
         }
-      }
-    });
-  }
 
-  // ── RIWAYAT ──────────────────────────────────────
-  function loadTxTabel(dataArr) {
-    if (!dataArr) return;
-    let html = dataArr.map(r => `
-      <tr>
-        <td style="font-size:12px;color:#64748b;">${esc(r[0])}</td>
-        <td style="font-weight:bold;">${esc(r[2])}</td>
-        <td>${esc(r[4])}</td>
-        <td style="color:var(--c2);font-weight:bold;">${rp(r[5])}</td>
-        <td><span style="font-size:11px;background:#e2e8f0;padding:2px 6px;border-radius:4px;">${esc(r[6]||'Tunai')}</span></td>
-      </tr>`).join('');
-    if (!dataArr.length) html = '<tr><td colspan="5" style="text-align:center;color:#888;">Belum ada riwayat.</td></tr>';
-    document.getElementById('tabel-tx').innerHTML = html;
-  }
+        // Tampilkan tombol "Lihat Teks Mentah" setelah OCR selesai
+        function showRawOcrButton() {
+            const btn = document.getElementById('btn-raw-ocr');
+            if (btn) btn.style.display = 'block';
+        }
 
-  function terapkanFilterTx() {
-    const ds = document.getElementById('filter-dari').value;
-    const ss = document.getElementById('filter-sampai').value;
-    let hasil = dbTransaksi;
-    if (ds) { const dari = new Date(ds+'T00:00:00'); hasil = hasil.filter(r => { const t=parseTanggalIndo(r[0]); return t&&t>=dari; }); }
-    if (ss) { const smp  = new Date(ss+'T23:59:59');  hasil = hasil.filter(r => { const t=parseTanggalIndo(r[0]); return t&&t<=smp; }); }
-    loadTxTabel(hasil);
-    const box = document.getElementById('filter-summary');
-    if (ds || ss) {
-      const tot = hasil.reduce((s,t)=>s+(Number(t[5])||0),0);
-      box.innerHTML = `Menampilkan <b>${hasil.length}</b> transaksi — Total Untung: <b>${rp(tot)}</b>`;
-      box.style.display = 'block';
-    } else { box.style.display = 'none'; }
-  }
-  function resetFilterTx() { document.getElementById('filter-dari').value=''; document.getElementById('filter-sampai').value=''; loadTxTabel(dbTransaksi); document.getElementById('filter-summary').style.display='none'; }
-  function filterHariIni() {
-    const now = new Date();
-    const s = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    document.getElementById('filter-dari').value = s;
-    document.getElementById('filter-sampai').value = s;
-    terapkanFilterTx();
-  }
+        function showRawOcrModal() {
+            document.getElementById('raw-ocr-text').value = window.__lastRawOcrText || '(belum ada data)';
+            document.getElementById('raw-ocr-modal').style.display = 'flex';
+        }
 
-  // ── PRODUK ───────────────────────────────────────
-  function renderTabelProduk() {
-    const tbody = document.getElementById('tabel-produk');
-    if (!tbody) return;
-    if (!dbProduk.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;">Belum ada produk.</td></tr>'; return; }
-    tbody.innerHTML = dbProduk.map(p => `
-      <tr>
-        <td>${esc(p.id)}</td>
-        <td style="font-weight:bold;">${esc(p.nama)}</td>
-        <td><span style="font-size:12px;background:#e2e8f0;padding:2px 6px;border-radius:4px;">${esc(p.jenis)}</span></td>
-        <td>${rp(p.jual)}</td>
-        <td>${p.stok}</td>
-        <td>
-          <i class="fas fa-pen btn-icon-edit" title="Edit" onclick="editProduk('${esc(p.id)}')"></i>
-          <i class="fas fa-trash btn-icon-del" title="Hapus" onclick="hapusProdukHandler('${esc(p.id)}')"></i>
-        </td>
-      </tr>`).join('');
-  }
+        function copyRawOcrText() {
+            const textarea = document.getElementById('raw-ocr-text');
+            textarea.select();
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                showToast('Teks disalin ke clipboard.', 'success');
+            }).catch(() => {
+                showToast('Gagal menyalin otomatis, silakan salin manual.', 'error');
+            });
+        }
 
-  function renderGrid(dataArray) {
-    let html = dataArray.map((p,i) => {
-      const warnaDinamis = getWarnaProduk(p.nama, p.jenis, i);
-      
-      return `
-      <div class="card" onclick="addCart('${esc(p.id)}')">
-        <div class="card-color-box" style="background:${warnaDinamis}">
-          <span class="stok-badge">${esc(p.stok)}</span><i class="fas fa-box-open"></i>
-        </div>
-        <div class="card-info">
-          <h4>${esc(p.nama)}</h4>
-          <span class="id-badge">${esc(p.id)}</span>
-          <div class="price-edit" title="Klik untuk Edit Produk" onclick="event.stopPropagation(); editProduk('${esc(p.id)}')">
-            ${rp(p.jual)} <i class="fas fa-pencil-alt" style="font-size:10px; opacity:0.6;"></i>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-    
-    if (!dataArray.length) html = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:20px;">Produk tidak ditemukan.</div>';
-    document.getElementById('grid-produk').innerHTML = html;
-  }
+        // ===================================================================
+        // JENIS TRANSAKSI (Transfer Bank / Topup E-Wallet / Bayar Tagihan / Lainnya)
+        // ===================================================================
+        // Field input HTML tetap sama (in-pengirim-nama, in-tujuan-rek, dst)
+        // untuk semua jenis transaksi -- yang berubah hanya LABEL-nya dan field
+        // mana yang ditampilkan/disembunyikan. Pendekatan ini dipilih supaya
+        // tidak perlu duplikasi form per jenis transaksi (lebih sedikit bug,
+        // lebih mudah dirawat).
+        let jenisTransaksiAktif = 'transfer';
 
-  function cariProduk() {
-    const k = document.getElementById('searchInput').value.toLowerCase();
-    renderGrid(dbProduk.filter(p => p.nama.toLowerCase().includes(k) || String(p.id).toLowerCase().includes(k)));
-  }
+        const KONFIGURASI_JENIS = {
+            transfer: {
+                labelUploadJudul: 'Upload Bukti Transfer',
+                labelUploadSub: 'Foto screenshot bukti transfer (BRImo, BCA, Mandiri, dll)',
+                labelPengirim: 'PENGIRIM', labelPengirimNama: 'Nama Pengirim', labelPengirimRek: 'Rekening Pengirim',
+                labelTujuan: 'PENERIMA', labelTujuanNama: 'Nama Tujuan', labelTujuanRek: 'Rekening Tujuan', labelTujuanBank: 'Bank Tujuan',
+                showNoPelanggan: false,
+                judulStruk: 'BUKTI TRANSFER'
+            },
+            ewallet: {
+                labelUploadJudul: 'Upload Bukti Topup E-Wallet',
+                labelUploadSub: 'Foto screenshot bukti topup DANA, OVO, GoPay, ShopeePay, dll',
+                labelPengirim: 'SUMBER DANA', labelPengirimNama: 'Nama Pemilik Rekening', labelPengirimRek: 'Rekening Sumber',
+                labelTujuan: 'TUJUAN TOPUP', labelTujuanNama: 'Nomor HP / ID Akun', labelTujuanRek: 'Nama Pemilik Akun', labelTujuanBank: 'E-Wallet Tujuan',
+                showNoPelanggan: false,
+                judulStruk: 'BUKTI TOPUP E-WALLET'
+            },
+            tagihan: {
+                labelUploadJudul: 'Upload Bukti Bayar Tagihan',
+                labelUploadSub: 'Foto screenshot bukti bayar listrik, pulsa, internet, dll',
+                labelPengirim: 'PEMBAYAR', labelPengirimNama: 'Nama Pembayar', labelPengirimRek: 'Rekening/Sumber Dana',
+                labelTujuan: 'LAYANAN', labelTujuanNama: 'Nama Pelanggan', labelTujuanRek: 'Jenis Layanan', labelTujuanBank: 'Penyedia Layanan',
+                showNoPelanggan: true,
+                judulStruk: 'BUKTI PEMBAYARAN'
+            },
+            lainnya: {
+                labelUploadJudul: 'Upload Bukti Transaksi',
+                labelUploadSub: 'Foto screenshot bukti transaksi apa pun',
+                labelPengirim: 'PIHAK 1', labelPengirimNama: 'Nama / Keterangan', labelPengirimRek: 'Nomor / Kode',
+                labelTujuan: 'PIHAK 2', labelTujuanNama: 'Nama / Keterangan', labelTujuanRek: 'Nomor / Kode', labelTujuanBank: 'Penyedia / Bank',
+                showNoPelanggan: false,
+                judulStruk: 'BUKTI TRANSAKSI'
+            }
+        };
 
-  function saveProd() {
-    const id    = document.getElementById('p-id').value.trim();
-    const nama  = document.getElementById('p-nama').value.trim();
-    const jenis = document.getElementById('p-jenis').value.trim() || 'UMUM';
-    const modal = document.getElementById('p-modal').value;
-    const jual  = document.getElementById('p-jual').value;
-    const stok  = document.getElementById('p-stok').value;
-    if (!id || !nama || modal==='' || jual==='') { alert('Mohon lengkapi ID, Nama, Harga Modal, dan Harga Jual!'); return; }
-    const p = { id, nama, jenis, modal, jual, stok };
-    const btn = document.getElementById('btn-simpan-prod');
-    const isEdit = editingProdukId !== null;
-    btn.disabled = true; btn.innerText = 'Menyimpan...';
-    google.script.run
-      .withSuccessHandler(() => { alert(isEdit ? 'Produk diperbarui!' : 'Tersimpan!'); batalEdit(); initApp(); })
-      .withFailureHandler(err => { alert('Gagal: '+(err?.message||err)); btn.disabled=false; btn.innerText=isEdit?'Update Produk':'Simpan Data'; })
-      .simpanProduk(p);
-  }
+        function pilihJenisTransaksi(jenis, btnEl) {
+            jenisTransaksiAktif = jenis;
+            const cfg = KONFIGURASI_JENIS[jenis];
 
-  function editProduk(id) {
-    const p = dbProduk.find(x => x.id == id);
-    if (!p) return;
-    editingProdukId = p.id;
-    document.getElementById('p-id').value = p.id;
-    document.getElementById('p-id').disabled = true;
-    document.getElementById('p-nama').value  = p.nama;
-    document.getElementById('p-jenis').value = p.jenis || '';
-    document.getElementById('p-modal').value = p.modal;
-    document.getElementById('p-jual').value  = p.jual;
-    document.getElementById('p-stok').value  = p.stok;
-    document.getElementById('btn-simpan-prod').innerText = 'Update Produk';
-    document.getElementById('btn-batal-edit').style.display = 'block';
-    switchView('prod'); window.scrollTo(0,0);
-  }
+            // Update tampilan chip aktif
+            document.querySelectorAll('.chip-jenis').forEach(c => c.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
 
-  function batalEdit() {
-    editingProdukId = null;
-    ['p-id','p-nama','p-jenis','p-modal','p-jual'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('p-id').disabled = false;
-    document.getElementById('p-stok').value = '100';
-    const btn = document.getElementById('btn-simpan-prod');
-    btn.disabled = false; btn.innerText = 'Simpan Data';
-    document.getElementById('btn-batal-edit').style.display = 'none';
-  }
+            // Update teks area upload
+            const placeholderJudul = document.querySelector('#upload-placeholder h2');
+            const placeholderSub = document.querySelector('#upload-placeholder p');
+            if (placeholderJudul) placeholderJudul.innerText = cfg.labelUploadJudul;
+            if (placeholderSub) placeholderSub.innerText = cfg.labelUploadSub;
 
-  function hapusProdukHandler(id) {
-    const p = dbProduk.find(x => x.id == id);
-    if (!p || !confirm(`Hapus produk "${p.nama}"? Tidak bisa dibatalkan.`)) return;
-    google.script.run
-      .withSuccessHandler(() => { if (editingProdukId == id) batalEdit(); initApp(); })
-      .withFailureHandler(err => alert('Gagal hapus: '+(err?.message||err)))
-      .hapusProduk(id);
-  }
+            // Update label form edit
+            document.getElementById('label-pengirim-nama').innerText = cfg.labelPengirimNama;
+            document.getElementById('label-pengirim-rek').innerText = cfg.labelPengirimRek;
+            document.getElementById('label-tujuan-nama').innerText = cfg.labelTujuanNama;
+            document.getElementById('label-tujuan-rek').innerText = cfg.labelTujuanRek;
+            document.getElementById('label-tujuan-bank').innerText = cfg.labelTujuanBank;
 
-  // ── KERANJANG & BAYAR ─────────────────────────────
-  function addCart(id) {
-    const prod = dbProduk.find(p => p.id == id);
-    if (!prod) return;
-    const exist = keranjang.find(k => k.id == id);
-    if (exist) {
-      exist.qty < prod.stok ? exist.qty++ : alert(`Stok "${prod.nama}" tidak cukup!`);
-    } else {
-      prod.stok > 0 ? keranjang.push({id:prod.id,nama:prod.nama,harga:prod.jual,modal:prod.modal,qty:1,max:prod.stok}) : alert(`Stok "${prod.nama}" habis!`);
-    }
-    updateCart();
-  }
-  function ubahQty(id, val) {
-    let item = keranjang.find(k => k.id == id);
-    if (!item) return;
-    item.qty += val;
-    if (item.qty <= 0) keranjang = keranjang.filter(k => k.id != id);
-    else if (item.qty > item.max) item.qty = item.max;
-    updateCart();
-  }
-  function kosongkanCart() { keranjang = []; updateCart(); }
+            // Tampilkan/sembunyikan field No. Pelanggan (khusus jenis "tagihan")
+            document.getElementById('group-no-pelanggan').style.display = cfg.showNoPelanggan ? 'block' : 'none';
 
-  function updateCart() {
-    const area   = document.getElementById('area-keranjang');
-    const txtTot = document.getElementById('txt-total');
-    const btn    = document.getElementById('btn-bayar');
-    const badge  = document.getElementById('cart-badge');
-    const mbBox  = document.getElementById('metode-bayar-box');
-    const kbBox  = document.getElementById('kembalian-box');
+            // Update label di preview struk
+            document.getElementById('label-out-pengirim').innerText = cfg.labelPengirim;
+            document.getElementById('label-out-tujuan').innerText = cfg.labelTujuan;
+            document.querySelector('.receipt-center p').innerText = cfg.judulStruk;
+            document.getElementById('block-out-no-pelanggan').style.display = cfg.showNoPelanggan ? 'block' : 'none';
+        }
 
-    if (!keranjang.length) {
-      area.innerHTML = `<div style="text-align:center;color:#ccc;margin-top:50px;"><i class="fas fa-shopping-cart fa-3x"></i><p>Kosong</p></div>`;
-      txtTot.innerText = 'Rp 0'; btn.disabled = true; btn.innerText = 'Bayar';
-      badge.style.display = 'none'; mbBox.style.display = 'none'; kbBox.style.display = 'none';
-      return;
-    }
-    let total = 0, totalItem = 0;
-    area.innerHTML = keranjang.map(k => {
-      total += k.harga * k.qty; totalItem += k.qty;
-      return `<div class="cart-item">
-        <div><h4 style="font-size:14px;margin-bottom:5px;">${esc(k.nama)}</h4><p style="font-size:13px;color:var(--primary);font-weight:bold;">${rp(k.harga)} x ${k.qty}</p></div>
-        <div class="qty-control">
-          <button class="qty-btn" onclick="ubahQty('${esc(k.id)}',-1)">-</button><span>${k.qty}</span><button class="qty-btn" onclick="ubahQty('${esc(k.id)}',1)">+</button>
-        </div>
-      </div>`;
-    }).join('');
-    txtTot.innerText = rp(total);
-    btn.disabled = false; btn.innerText = 'Bayar';
-    badge.innerText = totalItem; badge.style.display = 'block';
-    mbBox.style.display = 'flex';
-    kbBox.style.display = metodeBayar === 'Tunai' ? 'block' : 'none';
-    document.getElementById('input-bayar').value = '';
-    document.getElementById('txt-kembalian').innerText = 'Rp 0';
-    document.getElementById('kembalian-result').className = 'kembalian-result';
-  }
+        // 1. TABS LOGIC
+        // Catatan: TIDAK bergantung pada global `event` object, supaya aman
+        // dipanggil baik dari klik user (onclick="switchTab(...)") maupun
+        // dipanggil langsung dari kode (mis. setelah OCR selesai).
+        function switchTab(tabName, clickedEl) {
+            // Update UI Tab Buttons
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
 
-  function pilihMetode(m) {
-    metodeBayar = m;
-    ['tunai','transfer','qris'].forEach(x => document.getElementById('mb-'+x).classList.remove('active'));
-    document.getElementById('mb-'+m.toLowerCase()).classList.add('active');
-    document.getElementById('kembalian-box').style.display = m === 'Tunai' ? 'block' : 'none';
-  }
+            let target = clickedEl;
+            if (!target) {
+                // Fallback: cari tombol tab berdasarkan nama tab
+                target = Array.from(tabs).find(t =>
+                    (tabName === 'edit' && t.textContent.includes('Edit')) ||
+                    (tabName === 'preview' && t.textContent.includes('Pratinjau'))
+                );
+            }
+            if (target) target.classList.add('active');
 
-  function hitungKembalian() {
-    const total = keranjang.reduce((s,k)=>s+k.harga*k.qty, 0);
-    const bayar = Number(document.getElementById('input-bayar').value) || 0;
-    const sisa  = bayar - total;
-    const el    = document.getElementById('txt-kembalian');
-    const res   = document.getElementById('kembalian-result');
-    el.innerText = sisa >= 0 ? rp(sisa) : '- '+rp(Math.abs(sisa));
-    res.className = 'kembalian-result' + (sisa < 0 ? ' kurang' : '');
-  }
+            // Switch Content
+            if(tabName === 'edit') {
+                document.getElementById('tab-edit').style.display = 'flex';
+                document.getElementById('tab-preview').style.display = 'none';
+            } else {
+                document.getElementById('tab-edit').style.display = 'none';
+                document.getElementById('tab-preview').style.display = 'flex';
+                syncPreviewData(); // Update preview sebelum ditampilkan
+            }
+        }
 
-  function prosesBayar() {
-    if (!keranjang.length) return;
-    if (metodeBayar === 'Tunai') {
-      const total = keranjang.reduce((s,k)=>s+k.harga*k.qty, 0);
-      const bayar = Number(document.getElementById('input-bayar').value) || 0;
-      if (bayar > 0 && bayar < total) { alert('Uang yang diterima kurang!'); return; }
-    }
-    document.getElementById('cartPanel').classList.remove('mobile-open');
-    const btn = document.getElementById('btn-bayar');
-    btn.disabled = true; btn.innerText = 'Memproses...';
-    sembunyikanError();
+        // Helper format angka jadi ribuan (50000 -> 50.000)
+        function formatRibuan(angka) {
+            let n = parseInt(String(angka).replace(/\D/g, '')) || 0;
+            return n.toLocaleString('id-ID');
+        }
 
-    const snap = keranjang.map(k=>({nama:k.nama,harga:k.harga,qty:k.qty}));
-    const totalSnap = snap.reduce((s,k)=>s+k.harga*k.qty, 0);
-    const bayarSnap = Number(document.getElementById('input-bayar').value) || 0;
+        // 2. SINKRONISASI DATA EDIT KE PREVIEW
+        function syncPreviewData() {
+            document.getElementById('out-tanggal').innerText = document.getElementById('in-tanggal').value || '-';
+            document.getElementById('out-ref').innerText = document.getElementById('in-ref').value || '-';
+            
+            document.getElementById('out-pengirim-nama').innerText = document.getElementById('in-pengirim-nama').value || '-';
+            document.getElementById('out-pengirim-rek').innerText = document.getElementById('in-pengirim-rek').value || '-';
+            
+            document.getElementById('out-tujuan-nama').innerText = document.getElementById('in-tujuan-nama').value || '-';
+            document.getElementById('out-tujuan-rek').innerText = document.getElementById('in-tujuan-rek').value || '-';
+            document.getElementById('out-tujuan-bank').innerText = document.getElementById('in-tujuan-bank').value || '-';
 
-    google.script.run
-      .withSuccessHandler(res => { kosongkanCart(); initApp(); tampilkanStruk(snap, res.waktu, metodeBayar, bayarSnap, totalSnap); })
-      .withFailureHandler(err => { alert('Transaksi gagal: '+(err?.message||err)); btn.disabled=false; btn.innerText='Bayar'; })
-      .simpanTransaksiMulti(keranjang, metodeBayar);
-  }
+            const noPelangganEl = document.getElementById('in-no-pelanggan');
+            if (noPelangganEl) {
+                document.getElementById('out-no-pelanggan').innerText = formatNoPelangganTampil(noPelangganEl.value);
+            }
 
-  // ── STRUK ─────────────────────────────────────────
-  function tampilkanStruk(items, waktu, metode, bayar, total) {
-    document.getElementById('struk-waktu').innerText = waktu || '';
-    let tot = 0;
-    document.getElementById('struk-items').innerHTML = items.map(k => {
-      const sub = k.harga * k.qty; tot += sub;
-      return `<div class="struk-line"><span>${esc(k.nama)} x${k.qty}</span><span>${rp(sub)}</span></div>`;
-    }).join('');
-    const finalTot = total || tot;
-    document.getElementById('struk-total-harga').innerText = rp(finalTot);
-    let ekstra = `<div class="struk-divider"></div><div class="struk-line"><span>Metode</span><span><b>${esc(metode||'Tunai')}</b></span></div>`;
-    if ((metode||'Tunai') === 'Tunai' && bayar > 0) {
-      ekstra += `<div class="struk-line"><span>Dibayar</span><span>${rp(bayar)}</span></div>`;
-      ekstra += `<div class="struk-line"><span>Kembalian</span><span style="font-weight:bold;color:#10b981;">${rp(bayar-finalTot)}</span></div>`;
-    }
-    document.getElementById('struk-ekstra').innerHTML = ekstra;
-    document.getElementById('struk-overlay').classList.add('show');
-  }
-  function tutupStruk() { document.getElementById('struk-overlay').classList.remove('show'); }
+            const nominal = document.getElementById('in-nominal').value || '0';
+            const admin = document.getElementById('in-admin').value || '0';
+            
+            document.getElementById('out-nominal').innerText = 'Rp ' + formatRibuan(nominal);
+            document.getElementById('out-admin').innerText = 'Rp ' + formatRibuan(admin);
+            
+            // Hitung Total (format ribuan, aman dari NaN)
+            let n = parseInt(String(nominal).replace(/\D/g, '')) || 0;
+            let a = parseInt(String(admin).replace(/\D/g, '')) || 0;
+            let total = n + a;
+            document.getElementById('out-total').innerText = 'Rp ' + total.toLocaleString('id-ID');
+        }
 
-  // ── PENGELUARAN ───────────────────────────────────
-  function muatPengeluaran() {
-    const tbody = document.getElementById('tabel-keluar');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;padding:20px;">Memuat data...</td></tr>';
-    google.script.run
-      .withSuccessHandler(data => {
-        dbPengeluaran = Array.isArray(data) ? data : [];
-        renderTabelPengeluaran();
-        renderStatPengeluaran();
-        setDefaultTanggalKeluar();
-        if (dbTransaksi.length) renderDashboard(); // update laba bersih
-      })
-      .withFailureHandler(err => {
-        const msg = err?.message || String(err);
-        if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--c5);padding:20px;">Gagal memuat: ${esc(msg)}</td></tr>`;
-      })
-      .ambilPengeluaran();
-  }
+        // Auto update saat user mengetik di form
+        document.querySelectorAll('.edit-form input').forEach(input => {
+            input.addEventListener('input', syncPreviewData);
+        });
 
-  function renderTabelPengeluaran() {
-    const tbody = document.getElementById('tabel-keluar');
-    if (!tbody) return;
-    if (!dbPengeluaran.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;">Belum ada pengeluaran.</td></tr>'; return; }
-    tbody.innerHTML = dbPengeluaran.map((r,i) => `
-      <tr>
-        <td style="font-size:12px;color:#64748b;">${esc(r[0])}</td>
-        <td style="font-weight:bold;">${esc(r[1])}</td>
-        <td style="color:#555;">${esc(r[2])}</td>
-        <td style="color:var(--c5);font-weight:bold;">${rp(r[3])}</td>
-        <td><i class="fas fa-trash btn-icon-del" onclick="hapusPengeluaranHandler(${i})"></i></td>
-      </tr>`).join('');
-  }
+        // 3. LOGIKA UPLOAD & OCR GAMBAR
+        document.getElementById('kamera-input').addEventListener('change', handleImageUpload);
+        document.getElementById('galeri-input').addEventListener('change', handleImageUpload);
 
-  function renderStatPengeluaran() {
-    const batas = awalBulan(new Date());
-    let totalBulan=0, totalAll=0;
-    dbPengeluaran.forEach(r => {
-      const j = Number(r[3])||0; totalAll += j;
-      const t = parseTanggalPengeluaran(r[0]);
-      if (t && t >= batas) totalBulan += j;
-    });
-    const e1 = document.getElementById('stat-keluar-bulan');
-    const e2 = document.getElementById('stat-keluar-total');
-    if (e1) e1.innerText = rp(totalBulan);
-    if (e2) e2.innerText = rp(totalAll);
-  }
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-  function setDefaultTanggalKeluar() {
-    const el = document.getElementById('k-tanggal');
-    if (el && !el.value) {
-      const n = new Date();
-      el.value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-    }
-  }
+            // Tampilkan Preview Gambar
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('image-preview').src = event.target.result;
+                document.getElementById('image-preview').style.display = 'block';
+                document.getElementById('upload-placeholder').style.display = 'none';
+                
+                // Mulai proses OCR
+                processOCR(event.target.result);
+            };
+            reader.onerror = function() {
+                showToast('Gagal membaca file gambar.', 'error');
+            };
+            reader.readAsDataURL(file);
+            e.target.value = ''; // Reset
+        }
 
-  function simpanPengeluaranHandler() {
-    const tanggal = document.getElementById('k-tanggal').value;
-    const jenis   = document.getElementById('k-jenis').value.trim();
-    const ket     = document.getElementById('k-ket').value.trim();
-    const jumlah  = document.getElementById('k-jumlah').value;
-    if (!tanggal || !jenis || !jumlah || Number(jumlah) <= 0) { alert('Mohon lengkapi Tanggal, Jenis, dan Jumlah!'); return; }
-    const btn = document.getElementById('btn-simpan-keluar');
-    btn.disabled = true; btn.innerText = 'Menyimpan...';
-    google.script.run
-      .withSuccessHandler(() => {
-        alert('Pengeluaran tersimpan!');
-        document.getElementById('k-jenis').value = '';
-        document.getElementById('k-ket').value = '';
-        document.getElementById('k-jumlah').value = '';
-        btn.disabled = false; btn.innerText = 'Simpan Pengeluaran';
-        muatPengeluaran();
-      })
-      .withFailureHandler(err => { alert('Gagal: '+(err?.message||err)); btn.disabled=false; btn.innerText='Simpan Pengeluaran'; })
-      .simpanPengeluaran({ tanggal: formatTanggalPengeluaran(tanggal), jenis, keterangan: ket, jumlah: Number(jumlah) });
-  }
+        function processOCR(imageSrc) {
+            const loader = document.getElementById('loader');
+            const loaderTitle = document.getElementById('loader-title');
+            const loaderSub = document.getElementById('loader-sub');
+            const resultSection = document.getElementById('result-section');
+            
+            loaderTitle.innerText = 'Memproses Gambar...';
+            loaderSub.innerText = 'Membaca teks struk, mohon tunggu sebentar';
+            loader.style.display = 'flex';
+            resultSection.style.display = 'none';
 
-  function hapusPengeluaranHandler(idx) {
-    const r = dbPengeluaran[idx];
-    if (!r || !confirm(`Hapus pengeluaran "${r[1]}" — ${rp(r[3])}?`)) return;
-    google.script.run
-      .withSuccessHandler(() => muatPengeluaran())
-      .withFailureHandler(err => alert('Gagal hapus: '+(err?.message||err)))
-      .hapusPengeluaran(idx);
-  }
+            // Fungsi fallback jika preprocessing gagal: tetap lanjut OCR pakai gambar asli
+            function runOCR(srcToUse) {
+                Tesseract.recognize(
+                    srcToUse,
+                    'ind',
+                    {
+                        logger: m => console.log(m),
+                        // PSM 6: anggap gambar sebagai satu blok teks seragam
+                        // (cocok untuk struk yang barisnya rapi label:value).
+                        tessedit_pageseg_mode: '6',
+                        // Whitelist eksplisit memastikan karakter bintang (*)
+                        // sensor rekening tidak dibuang Tesseract sebagai noise.
+                        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,:/*- '
+                    }
+                ).then(({ data: { text } }) => {
+                    loader.style.display = 'none';
+                    resultSection.style.display = 'flex';
 
-  window.onload = initApp;
-</script>
+                    console.log("Raw OCR Text:", text);
+                    window.__lastRawOcrText = text;
+                    showRawOcrButton();
+
+                    // extractDataFromText dipisah try-catch sendiri: kalau parsing
+                    // sebagian gagal, OCR tetap dianggap sukses (toast tidak
+                    // menampilkan "gagal total" padahal teks berhasil dibaca).
+                    try {
+                        extractDataFromText(text);
+                        switchTab('edit');
+                        showToast('Struk terbaca. Cek & lengkapi data sebelum cetak.', 'success');
+                    } catch (parseErr) {
+                        console.error('Parsing data gagal sebagian:', parseErr);
+                        switchTab('edit');
+                        showToast('Teks terbaca, tapi sebagian data perlu dilengkapi manual.', 'info', 4000);
+                    }
+
+                }).catch(err => {
+                    console.error(err);
+                    loader.style.display = 'none';
+                    resultSection.style.display = 'flex';
+                    showToast('Gagal membaca teks otomatis. Silakan isi data manual.', 'error', 4000);
+                });
+            }
+
+            // Hitung threshold biner secara adaptif dari histogram gambar
+            // (metode Otsu sederhana), bukan nilai tetap 150. Watermark abu-abu
+            // muda dan teks abu-abu sekunder kontrasnya bisa berbeda-beda antar
+            // foto (tergantung pencahayaan/kompresi), jadi threshold tetap sering
+            // salah pilih -- kadang watermark ikut jadi "teks", kadang teks tipis
+            // (seperti bintang sensor rekening) malah hilang jadi "background".
+            function computeOtsuThreshold(grayHistogram, totalPixels) {
+                let sum = 0;
+                for (let t = 0; t < 256; t++) sum += t * grayHistogram[t];
+
+                let sumB = 0, wB = 0, wF = 0, varMax = 0, threshold = 150;
+                for (let t = 0; t < 256; t++) {
+                    wB += grayHistogram[t];
+                    if (wB === 0) continue;
+                    wF = totalPixels - wB;
+                    if (wF === 0) break;
+
+                    sumB += t * grayHistogram[t];
+                    const mB = sumB / wB;
+                    const mF = (sum - sumB) / wF;
+                    const varBetween = wB * wF * (mB - mF) * (mB - mF);
+
+                    if (varBetween > varMax) {
+                        varMax = varBetween;
+                        threshold = t;
+                    }
+                }
+                return threshold;
+            }
+
+            // Pra-pemrosesan gambar: upscale + grayscale + binarization adaptif
+            const img = new Image();
+            img.onload = function() {
+                try {
+                    const SCALE = 2; // Upscale 2x: karakter kecil (mis. tanda bintang
+                                      // sensor rekening) jauh lebih mudah terbaca
+                                      // Tesseract pada resolusi lebih besar.
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width * SCALE;
+                    canvas.height = img.height * SCALE;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    // Bangun histogram grayscale dulu untuk hitung threshold adaptif
+                    const grayValues = new Uint8ClampedArray(data.length / 4);
+                    const histogram = new Array(256).fill(0);
+                    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+                        const gray = Math.round(0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2]);
+                        grayValues[p] = gray;
+                        histogram[gray]++;
+                    }
+
+                    const threshold = computeOtsuThreshold(histogram, grayValues.length);
+
+                    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+                        const color = grayValues[p] > threshold ? 255 : 0;
+                        data[i] = color;
+                        data[i+1] = color;
+                        data[i+2] = color;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    const processedSrc = canvas.toDataURL();
+                    runOCR(processedSrc);
+                } catch (err) {
+                    console.error('Preprocessing gagal, lanjut pakai gambar asli:', err);
+                    runOCR(imageSrc);
+                }
+            };
+            img.onerror = function() {
+                loader.style.display = 'none';
+                resultSection.style.display = 'flex';
+                showToast('Gambar tidak valid atau rusak.', 'error');
+            };
+            img.src = imageSrc;
+        }
+
+        // 4. EKSTRAKSI TEKS CERDAS (Mencocokkan Pola Struk Bank)
+        function extractDataFromText(text) {
+            // Memecah teks menjadi baris demi baris
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            let dataText = text.replace(/\n/g, ' '); // Gabungan teks untuk pencarian global
+
+            // 1. Cari Nominal (Rp diikuti angka dan titik)
+            const nominalMatch = dataText.match(/Rp\s*([\d\.]+)/i);
+            if(nominalMatch) document.getElementById('in-nominal').value = nominalMatch[1].replace(/\./g, '');
+
+            // 2. Cari No Referensi (deretan angka panjang setelah kata Ref)
+            const refMatch = dataText.match(/Ref(?:erensi)?.*?(\d{10,})/i);
+            if(refMatch) document.getElementById('in-ref').value = refMatch[1];
+
+            // 3. Cari Tanggal (contoh pola: 17 Juni 2026, 13:43:32 WIB)
+            const dateMatch = dataText.match(/(\d{1,2}\s+[A-Za-z]+\s+\d{4}[,\s]+\d{2}:\d{2}(?::\d{2})?(?:\s+WIB|\s+WITA|\s+WIT)?)/i);
+            if(dateMatch) document.getElementById('in-tanggal').value = dateMatch[1];
+
+            // 4. Ekstrak Pengirim & Penerima dengan metode Blok (Block Parsing)
+            let section = 'none';
+            let pengirimData = [];
+            let tujuanData = [];
+
+            for (let line of lines) {
+                let lLower = line.toLowerCase();
+                // Deteksi awal blok (diperluas: selain transfer bank, juga
+                // mencakup pola umum struk topup e-wallet & bayar tagihan)
+                if (lLower.includes('sumber dana') || lLower === 'dari' || lLower.includes('pembayar') || lLower.includes('akun sumber')) {
+                    section = 'pengirim';
+                    continue;
+                }
+                if (lLower.includes('tujuan') || lLower === 'ke' || lLower.includes('detail pembayaran') || lLower.includes('detail tagihan') || lLower.includes('penerima')) {
+                    section = 'tujuan';
+                    continue;
+                }
+                // Deteksi akhir blok
+                if (lLower.includes('jenis transaksi') || lLower.includes('catatan') || lLower.includes('nominal') || lLower.includes('rincian')) {
+                    section = 'none';
+                }
+
+                if (section === 'pengirim') pengirimData.push(line);
+                if (section === 'tujuan') tujuanData.push(line);
+            }
+
+            // Deteksi No. Pelanggan / ID (untuk jenis "Bayar Tagihan"): biasanya
+            // ditulis sebagai "ID Pelanggan: 123456" atau "No. Pelanggan 123456"
+            // atau "Nomor Meter/Token: 123456" di struk PLN/pulsa/internet.
+            const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\s*meter|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
+            const noPelangganEl = document.getElementById('in-no-pelanggan');
+            if (noPelangganMatch && noPelangganEl) noPelangganEl.value = noPelangganMatch[1];
+
+            // Deteksi nomor HP Indonesia (untuk jenis "Topup E-Wallet"): pola
+            // umum 08xx atau 628xx, panjang 10-13 digit.
+            const noHpMatch = dataText.match(/\b(0|62)8[0-9]{8,11}\b/);
+
+            // Fungsi pembersih: Membuang inisial ikon (seperti "KM " atau "OE " di awal nama)
+            const cleanName = (name) => {
+                let parts = name.split(' ');
+                if (parts.length > 1 && parts[0].length <= 3 && parts[0] === parts[0].toUpperCase()) {
+                    parts.shift(); // Buang inisial
+                }
+                return parts.join(' ').replace(/[^a-zA-Z\s\.]/g, '').trim(); // Hapus simbol aneh
+            };
+
+            // Fungsi identifikasi: Apakah baris ini nomor rekening atau nama bank?
+            // Threshold diturunkan dari 8 ke 5 karakter, karena watermark/sensor
+            // bintang pada struk BRImo sering membuat OCR membaca rekening jadi
+            // lebih pendek dari aslinya (mis. "2216 **** **** 501" terbaca
+            // tidak lengkap). Tetap mensyaratkan minimal ada digit asli, supaya
+            // tidak salah tangkap teks biasa.
+            const isBankAccount = (str) => /[\d\*\.\s\-xX]{5,}/.test(str) && (str.match(/\d/g) || []).length >= 2;
+
+            // Toleransi typo OCR umum: huruf "BRI" kadang terbaca "BERI" atau
+            // "8RI" karena kemiripan bentuk font pada struk watermark.
+            // Diperluas juga untuk nama e-wallet (topup) dan penyedia layanan
+            // tagihan (PLN/listrik, pulsa/telkomsel-indosat-xl, PDAM, internet).
+            const isBankName = (str) => /bank|bca|\bbri\b|beri|mandiri|bni|bsi|cimb|dana|ovo|gopay|gojek|shopeepay|linkaja|pln|pdam|telkomsel|indosat|\bxl\b|tri\b|smartfren|indihome|wifi|listrik|pulsa|internet/i.test(str);
+
+            // Auto-koreksi nama bank/e-wallet/layanan yang tercampur inisial
+            // avatar (mis. "G BANK BRI", "YA BANKBERI") jadi format bersih.
+            // Cek pola typo "BERI" SEBELUM "BRI" murni supaya tidak salah
+            // urutan pencocokan.
+            const cleanBankName = (str) => {
+                let s = str.toUpperCase();
+                if (s.includes('BERI') || s.includes('BRI')) return 'BANK BRI';
+                if (s.includes('BCA')) return 'BANK BCA';
+                if (s.includes('MANDIRI')) return 'BANK MANDIRI';
+                if (s.includes('BNI')) return 'BANK BNI';
+                if (s.includes('DANA')) return 'DANA';
+                if (s.includes('OVO')) return 'OVO';
+                if (s.includes('GOPAY') || s.includes('GOJEK')) return 'GOPAY';
+                if (s.includes('SHOPEEPAY')) return 'SHOPEEPAY';
+                if (s.includes('LINKAJA')) return 'LINKAJA';
+                if (s.includes('PLN') || s.includes('LISTRIK')) return 'PLN';
+                if (s.includes('PDAM')) return 'PDAM';
+                if (s.includes('TELKOMSEL')) return 'TELKOMSEL';
+                if (s.includes('INDOSAT')) return 'INDOSAT';
+                if (s.includes('INDIHOME') || s.includes('WIFI')) return 'INDIHOME';
+                return str.trim();
+            };
+
+            // --- Parsing Blok Pengirim ---
+            // Catatan: nomor rekening TIDAK ditebak ulang formatnya, ditampilkan
+            // apa adanya hasil OCR (hanya titik->bintang) agar user yang koreksi manual.
+            // pBank ditangkap juga (meski tidak dipakai di form saat ini) supaya
+            // baris nama bank pengirim tidak salah ditangkap sebagai nama orang.
+            // Bersihkan hasil OCR baris rekening: ambil dari digit pertama sampai
+            // digit terakhir di baris itu (apa adanya), lalu rapikan bagian
+            // tengahnya (kemungkinan salah baca tanda bintang sensor "****")
+            // jadi format standar bank Indonesia: "XXXX **** **** XXX"
+            // (4 digit awal + 2 grup bintang + sisa digit akhir).
+            const cleanRekeningOcr = (str) => {
+                // Potong dari digit pertama sampai digit terakhir saja (buang
+                // kata lain yang mungkin ikut tertangkap di awal/akhir baris)
+                const firstDigit = str.search(/\d/);
+                const lastDigitFromEnd = [...str].reverse().join('').search(/\d/);
+                if (firstDigit === -1) return str.trim();
+                const lastDigit = str.length - 1 - lastDigitFromEnd;
+                let core = str.substring(firstDigit, lastDigit + 1);
+
+                // Kalau core HANYA berisi digit, spasi, dan/atau tanda bintang
+                // (tidak ada huruf sampah) -> ini rekening BERSIH, baik yang
+                // memang sudah tersensor rapi (mis. "2216 **** **** 501") atau
+                // yang memang tidak disensor sama sekali (mis. rekening tujuan
+                // "3843 0100 4391 505"). JANGAN diubah/disensor ulang.
+                if (/^[\d\*\s]+$/.test(core)) {
+                    return core.trim().replace(/\s+/g, ' ');
+                }
+
+                // Sampai sini berarti core mengandung huruf (kemungkinan salah
+                // baca tanda bintang sensor oleh OCR). Susun ulang jadi format
+                // baku bank Indonesia "XXXX **** **** XXX" dari digit yang
+                // berhasil terbaca, HANYA jika digitnya cukup (>=6) untuk pola
+                // itu masuk akal sebagai rekening tersensor.
+                const allDigits = core.match(/\d/g) || [];
+                if (allDigits.length >= 6) {
+                    const depan = allDigits.slice(0, 4).join('');
+                    const belakang = allDigits.slice(-3).join('');
+                    return `${depan} **** **** ${belakang}`;
+                }
+
+                // Fallback: digit terlalu sedikit untuk pola standar, tampilkan
+                // apa adanya (huruf acak dirapikan jadi satu blok bintang)
+                // supaya user tetap bisa menilai & mengoreksi manual.
+                core = core.replace(/[A-Za-z\.\-]+/g, ' **** ').replace(/\s+/g, ' ');
+                return core.trim();
+            };
+
+            let pNama = "", pRek = "", pBank = "";
+            for (let item of pengirimData) {
+                if (isBankAccount(item) && pRek === "") {
+                    pRek = cleanRekeningOcr(item);
+                } else if (isBankName(item) && pBank === "") {
+                    pBank = cleanBankName(item);
+                } else if (item.length > 3 && pNama === "") {
+                    pNama = cleanName(item);
+                }
+            }
+
+            // Fallback terakhir: kalau sampai akhir blok pengirim masih kosong,
+            // ambil baris APAPUN di blok pengirim yang mengandung minimal 2 digit
+            // (selain baris nama & nama bank yang sudah dipakai), supaya rekening
+            // tidak dibiarkan kosong total walau hasil OCR-nya tidak sempurna.
+            if (pRek === "") {
+                for (let item of pengirimData) {
+                    if (isBankName(item)) continue;
+                    if ((item.match(/\d/g) || []).length >= 2) {
+                        pRek = cleanRekeningOcr(item);
+                        break;
+                    }
+                }
+            }
+
+            // --- Parsing Blok Tujuan ---
+            let tNama = "", tRek = "", tBank = "";
+            for (let item of tujuanData) {
+                if (isBankAccount(item) && tRek === "") {
+                    tRek = cleanRekeningOcr(item);
+                } else if (isBankName(item) && tBank === "") {
+                    tBank = cleanBankName(item);
+                } else if (item.length > 3 && tNama === "") {
+                    tNama = cleanName(item);
+                }
+            }
+
+            // Fallback yang sama untuk blok tujuan
+            if (tRek === "") {
+                for (let item of tujuanData) {
+                    if (isBankName(item)) continue;
+                    if ((item.match(/\d/g) || []).length >= 2) {
+                        tRek = cleanRekeningOcr(item);
+                        break;
+                    }
+                }
+            }
+
+            // Terapkan ke form jika data ditemukan (kosongkan kolom sebelum diisi otomatis)
+            document.getElementById('in-pengirim-nama').value = "";
+            document.getElementById('in-pengirim-rek').value = "";
+            document.getElementById('in-tujuan-nama').value = "";
+            document.getElementById('in-tujuan-rek').value = "";
+
+            if (pNama) document.getElementById('in-pengirim-nama').value = pNama;
+            if (pRek) document.getElementById('in-pengirim-rek').value = pRek;
+            
+            if (tNama) document.getElementById('in-tujuan-nama').value = tNama;
+            if (tRek) document.getElementById('in-tujuan-rek').value = tRek;
+            // cleanBankName sudah mengembalikan format final yang benar
+            // (mis. "DANA", "PLN", "BANK BRI"), jadi tidak perlu uppercase paksa
+            // lagi (itu bisa merusak nama yang sengaja campuran kalau ada).
+            if (tBank) document.getElementById('in-tujuan-bank').value = tBank;
+
+            // Khusus jenis "Topup E-Wallet": kalau field "Nomor HP / ID Akun"
+            // (in-tujuan-nama) masih kosong tapi ada nomor HP yang terdeteksi
+            // di teks, isi otomatis -- karena pada struk topup, nomor HP
+            // tujuan sering tertulis terpisah dari blok nama.
+            if (jenisTransaksiAktif === 'ewallet' && noHpMatch) {
+                const tujuanNamaEl = document.getElementById('in-tujuan-nama');
+                if (!tujuanNamaEl.value) tujuanNamaEl.value = noHpMatch[0];
+            }
+
+            // Sinkronkan hasil tangkapan ke layar pratinjau struk
+            syncPreviewData();
+        }
+
+        // ===================================================================
+        // 5. FITUR CETAK BLUETOOTH THERMAL (WEB BLUETOOTH API) - MP-58A1
+        // ===================================================================
+        //
+        // Printer MP-58A1 (dan kebanyakan printer thermal 58mm generik
+        // sekelas Goojprt/Zjiang) memakai chip BLE "CC41" dengan:
+        //   Service UUID        : 49535343-fe7d-4ae5-8fa9-9fafd205e455
+        //   Characteristic Write: 49535343-8841-43f4-a8d4-ecbe34729bb3
+        //
+        // Sebagai jaga-jaga (unit/varian firmware kadang beda), kita siapkan
+        // beberapa kandidat UUID umum lain dan dicoba berurutan.
+
+        const PRINTER_PROFILES = [
+            {
+                name: 'CC41 (MP-58A1 / Goojprt / Zjiang)',
+                service: '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+                write: '49535343-8841-43f4-a8d4-ecbe34729bb3'
+            },
+            {
+                name: 'Generic FF00',
+                service: '0000ff00-0000-1000-8000-00805f9b34fb',
+                write: '0000ff02-0000-1000-8000-00805f9b34fb'
+            },
+            {
+                name: 'Generic 18F0',
+                service: '000018f0-0000-1000-8000-00805f9b34fb',
+                write: '00002af1-0000-1000-8000-00805f9b34fb'
+            }
+        ];
+
+        // Menyimpan koneksi printer supaya tidak perlu pairing ulang tiap cetak
+        let printerConn = { device: null, characteristic: null, profile: null };
+
+        function setPrinterButtonState(connected, label) {
+            const btn = document.getElementById('btn-printer');
+            const labelEl = document.getElementById('printer-label');
+            btn.classList.toggle('connected', connected);
+            labelEl.innerText = label;
+        }
+
+        // Cari characteristic yang valid dari beberapa kandidat UUID
+        async function connectToPrinter() {
+            // Minta user pilih perangkat. acceptAllDevices dipakai karena nama
+            // dan service printer thermal murah sangat bervariasi antar unit.
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: PRINTER_PROFILES.map(p => p.service)
+            });
+
+            showToast('Menghubungkan ke ' + (device.name || 'printer') + '...', 'info', 2000);
+
+            device.addEventListener('gattserverdisconnected', () => {
+                printerConn = { device: null, characteristic: null, profile: null };
+                setPrinterButtonState(false, 'Printer');
+            });
+
+            const server = await device.gatt.connect();
+
+            // Coba tiap profil UUID sampai ketemu yang cocok dengan printer ini
+            let lastError = null;
+            for (const profile of PRINTER_PROFILES) {
+                try {
+                    const service = await server.getPrimaryService(profile.service);
+                    const characteristic = await service.getCharacteristic(profile.write);
+                    printerConn = { device, characteristic, profile };
+                    setPrinterButtonState(true, 'Terhubung');
+                    showToast('Printer terhubung: ' + (device.name || profile.name), 'success');
+                    return printerConn;
+                } catch (err) {
+                    lastError = err;
+                    continue;
+                }
+            }
+
+            // Tidak ada profil yang cocok -> coba scan semua service yang tersedia di device
+            try {
+                const services = await server.getPrimaryServices();
+                for (const service of services) {
+                    try {
+                        const characteristics = await service.getCharacteristics();
+                        const writable = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                        if (writable) {
+                            printerConn = { device, characteristic: writable, profile: { name: 'Auto-detect' } };
+                            setPrinterButtonState(true, 'Terhubung');
+                            showToast('Printer terhubung (mode deteksi otomatis)', 'success');
+                            return printerConn;
+                        }
+                    } catch (e) { continue; }
+                }
+            } catch (e) { lastError = e; }
+
+            throw lastError || new Error('Tidak ditemukan characteristic yang bisa ditulisi pada perangkat ini.');
+        }
+
+        // ESC/POS: kirim per-chunk kecil dengan jeda, supaya tidak gagal/terpotong
+        // di printer BLE murah yang punya batas MTU kecil (umumnya ~20 byte).
+        async function writeInChunks(characteristic, bytes, chunkSize = 20, delayMs = 25) {
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                const chunk = bytes.slice(i, i + chunkSize);
+                if (characteristic.properties && characteristic.properties.writeWithoutResponse) {
+                    await characteristic.writeValueWithoutResponse(chunk);
+                } else {
+                    await characteristic.writeValue(chunk);
+                }
+                await new Promise(res => setTimeout(res, delayMs));
+            }
+        }
+
+        // --- Helper format teks struk lebar 32 karakter (kertas 58mm) ---
+        const PAPER_WIDTH = 32;
+
+        function padLabelValue(label, value, width = PAPER_WIDTH) {
+            // label kiri, value rata kanan, dipotong/wrap kalau kepanjangan
+            value = String(value || '-');
+            const maxValueLen = width - label.length - 1;
+            if (value.length <= maxValueLen) {
+                const spaces = width - label.length - value.length;
+                return label + ' '.repeat(Math.max(1, spaces)) + value;
+            }
+            // Value kepanjangan -> taruh value di baris berikutnya, rata kanan
+            const lines = [];
+            lines.push(label);
+            let remaining = value;
+            while (remaining.length > 0) {
+                const part = remaining.slice(0, width);
+                remaining = remaining.slice(width);
+                const spaces = Math.max(0, width - part.length);
+                lines.push(' '.repeat(spaces) + part);
+            }
+            return lines.join('\n');
+        }
+
+        function centerText(text, width = PAPER_WIDTH) {
+            text = String(text);
+            if (text.length >= width) return text;
+            const spaces = Math.floor((width - text.length) / 2);
+            return ' '.repeat(spaces) + text;
+        }
+
+        function buildReceiptEscPos() {
+            const get = (id) => document.getElementById(id).value || '-';
+            const nominal = formatRibuan(document.getElementById('in-nominal').value || '0');
+            const admin = formatRibuan(document.getElementById('in-admin').value || '0');
+            const total = document.getElementById('out-total').innerText.replace('Rp', '').trim();
+            const line = '-'.repeat(PAPER_WIDTH);
+            const cfg = KONFIGURASI_JENIS[jenisTransaksiAktif] || KONFIGURASI_JENIS.transfer;
+
+            let t = "\x1B\x40"; // Initialize printer
+            t += "\x1B\x61\x01"; // Align center
+            t += "\x1B\x21\x10"; // Font: double height (judul lebih jelas)
+            t += "MUSTAKIM MINI ATM\n";
+            t += "\x1B\x21\x00"; // Font normal (reset eksplisit sebelum lanjut)
+            t += cfg.judulStruk + "\n";
+            t += line + "\n";
+
+            t += "\x1B\x61\x00"; // Align left
+            t += padLabelValue('Tanggal', get('in-tanggal')) + "\n";
+            t += padLabelValue('No.Ref', get('in-ref')) + "\n";
+            t += line + "\n";
+
+            t += cfg.labelPengirim + "\n";
+            t += padLabelValue('Nama', get('in-pengirim-nama')) + "\n";
+            t += padLabelValue('Rek', get('in-pengirim-rek')) + "\n";
+            t += line + "\n";
+
+            t += cfg.labelTujuan + "\n";
+            t += padLabelValue('Nama', get('in-tujuan-nama')) + "\n";
+            t += padLabelValue('Rek', get('in-tujuan-rek')) + "\n";
+            t += padLabelValue('Bank', get('in-tujuan-bank')) + "\n";
+
+            // No. Pelanggan/Token dicetak MENONJOL (center, bold, dipisah per
+            // 4 digit) -- urutan SAMA seperti preview layar: muncul di dalam
+            // blok Tujuan, SEBELUM garis pemisah penutup blok itu, bukan
+            // sesudahnya. Ini sering jadi nomor yang perlu dibaca ulang/
+            // disalin pelanggan (terutama token listrik PLN yang biasanya 20
+            // digit). Font double-width SENGAJA tidak dipakai untuk nomor
+            // panjang karena akan overflow/terpotong di kertas 58mm (lebar
+            // efektif hanya ~16 karakter dengan font double-width); sebagai
+            // gantinya pakai bold + pemisah strip per 4 digit.
+            if (cfg.showNoPelanggan) {
+                const noPelangganFormatted = formatNoPelangganTampil(get('in-no-pelanggan'));
+
+                t += "\x1B\x61\x01"; // Align center
+                t += "No. Pelanggan / Token\n";
+                t += "\x1B\x45\x01"; // Bold on
+                if (noPelangganFormatted.length <= 16) {
+                    // Cukup pendek -> aman pakai font besar (double height saja,
+                    // tanpa double width, supaya tidak overflow horizontal)
+                    t += "\x1B\x21\x10"; // Double height only
+                    t += noPelangganFormatted + "\n";
+                    t += "\x1B\x21\x00"; // Font normal
+                } else {
+                    // Token panjang (mis. 20 digit PLN) -> font normal tapi
+                    // tetap bold + dikelompokkan per 4 digit, supaya muat
+                    // tanpa terpotong/wrap acak
+                    t += noPelangganFormatted + "\n";
+                }
+                t += "\x1B\x45\x00"; // Bold off
+                t += "\x1B\x61\x00"; // Align left (reset eksplisit)
+            }
+            t += line + "\n";
+
+            t += padLabelValue('Nominal', 'Rp ' + nominal) + "\n";
+            t += padLabelValue('Admin', 'Rp ' + admin) + "\n";
+            t += "\x1B\x45\x01"; // Bold on
+            t += padLabelValue('TOTAL', 'Rp ' + total) + "\n";
+            t += "\x1B\x45\x00"; // Bold off
+            t += line + "\n";
+
+            // Footer: SAMA PERSIS dengan preview layar, termasuk baris
+            // "====...====" yang ada di preview tapi sebelumnya tidak ikut
+            // dicetak. Lebar baris "=" disesuaikan dengan PAPER_WIDTH supaya
+            // proporsional di kertas 58mm (bukan jumlah karakter tetap dari
+            // preview HTML yang dirancang untuk lebar layar berbeda).
+            t += "\x1B\x61\x01"; // Align center
+            t += "Transaksi berhasil\n";
+            t += "Terima kasih telah\nmenggunakan layanan kami\n";
+            t += "=".repeat(PAPER_WIDTH) + "\n";
+            t += "\n\n\n"; // feed 3 baris sebelum sobek manual (ubah jumlah \n di sini kalau ingin lebih panjang/pendek)
+            // Catatan: perintah potong otomatis (GS V) SENGAJA tidak dikirim.
+            // MP-58A1 dan kebanyakan printer thermal 58mm generik tidak
+            // dilengkapi cutter mekanis (potong manual oleh pengguna), dan
+            // mengirim command itu ke printer yang tidak support bisa membuat
+            // printer melakukan feed tambahan yang tidak perlu (kertas kosong
+            // panjang) karena command tidak dikenali dan dianggap data lain.
+
+            return t;
+        }
+
+        function validateBeforePrint() {
+            const nominal = document.getElementById('in-nominal').value;
+            if (!nominal || parseInt(nominal.replace(/\D/g, '')) <= 0) {
+                showToast('Nominal belum diisi. Lengkapi dulu sebelum mencetak.', 'error', 3500);
+                return false;
+            }
+            return true;
+        }
+
+        async function printReceiptBluetooth() {
+            if (!navigator.bluetooth) {
+                showToast('Browser ini tidak mendukung Web Bluetooth. Gunakan Chrome di Android.', 'error', 4000);
+                return;
+            }
+            if (!validateBeforePrint()) return;
+
+            const btn = document.getElementById('btn-printer');
+            btn.disabled = true;
+
+            try {
+                // Konek dulu kalau belum / koneksi putus
+                if (!printerConn.characteristic || !printerConn.device || !printerConn.device.gatt.connected) {
+                    await connectToPrinter();
+                }
+
+                showToast('Mengirim struk ke printer...', 'info', 2000);
+
+                const receiptText = buildReceiptEscPos();
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(receiptText);
+
+                await writeInChunks(printerConn.characteristic, bytes);
+
+                showToast('Struk berhasil dicetak!', 'success');
+            } catch (error) {
+                console.error(error);
+                let msg = 'Gagal mencetak. Pastikan Bluetooth aktif & printer menyala.';
+                if (error && error.name === 'NotFoundError') {
+                    msg = 'Tidak ada printer dipilih.';
+                } else if (error && error.message) {
+                    msg = 'Gagal: ' + error.message;
+                }
+                showToast(msg, 'error', 4000);
+                setPrinterButtonState(false, 'Printer');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // ===================================================================
+        // 6. NAVIGASI HALAMAN (Pindai <-> Riwayat)
+        // ===================================================================
+        function switchPage(page) {
+            const pageScan = document.getElementById('page-scan');
+            const pageRiwayat = document.getElementById('page-riwayat');
+            const navPindai = document.getElementById('nav-pindai');
+            const navRiwayat = document.getElementById('nav-riwayat');
+
+            if (page === 'scan') {
+                pageScan.classList.remove('hidden');
+                pageRiwayat.classList.add('hidden');
+                navPindai.classList.add('active');
+                navRiwayat.classList.remove('active');
+            } else {
+                pageScan.classList.add('hidden');
+                pageRiwayat.classList.remove('hidden');
+                navPindai.classList.remove('active');
+                navRiwayat.classList.add('active');
+                loadRiwayat();
+            }
+        }
+
+        // ===================================================================
+        // 7. SIMPAN & MUAT RIWAYAT TRANSAKSI (via Apps Script API)
+        // ===================================================================
+        function isApiConfigured() {
+            return API_URL && !API_URL.includes('GANTI_DENGAN_URL_WEB_APP_ANDA');
+        }
+
+        async function simpanKeRiwayat() {
+            if (!isApiConfigured()) {
+                showToast('API belum dikonfigurasi. Set API_URL di kode terlebih dahulu.', 'error', 4000);
+                return;
+            }
+            if (!validateBeforePrint()) return; // pakai validasi nominal yang sama
+
+            const payload = {
+                jenis: jenisTransaksiAktif,
+                tanggal: document.getElementById('in-tanggal').value,
+                ref: document.getElementById('in-ref').value,
+                pengirim: document.getElementById('in-pengirim-nama').value,
+                rekPengirim: document.getElementById('in-pengirim-rek').value,
+                tujuan: document.getElementById('in-tujuan-nama').value,
+                rekTujuan: document.getElementById('in-tujuan-rek').value,
+                bank: document.getElementById('in-tujuan-bank').value,
+                noPelanggan: document.getElementById('in-no-pelanggan').value,
+                nominal: document.getElementById('in-nominal').value,
+                admin: document.getElementById('in-admin').value
+            };
+
+            try {
+                showToast('Menyimpan transaksi...', 'info', 2000);
+                // Content-Type: text/plain dipakai sengaja (bukan application/json)
+                // supaya browser TIDAK mengirim preflight OPTIONS, karena Apps
+                // Script Web App tidak bisa merespons preflight CORS dengan benar.
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    showToast('Transaksi tersimpan ke riwayat.', 'success');
+                } else {
+                    showToast('Gagal menyimpan: ' + (result.message || 'unknown error'), 'error', 4000);
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Gagal terhubung ke server riwayat.', 'error', 4000);
+            }
+        }
+
+        // Format No. Pelanggan/Token jadi kelompok per-4-digit dengan strip,
+        // format umum token PLN, supaya lebih mudah dibaca di semua tempat
+        // (preview layar, cetak printer, share WhatsApp).
+        function formatNoPelangganTampil(raw) {
+            const clean = String(raw || '').replace(/\s|-/g, '');
+            if (!clean) return '-';
+            return clean.match(/.{1,4}/g)?.join('-') || clean;
+        }
+
+        // ===================================================================
+        // 8. SHARE KE WHATSAPP (format teks rapi, mirip hasil cetak)
+        // ===================================================================
+        function buildReceiptPlainText() {
+            const get = (id) => document.getElementById(id).value || '-';
+            const nominal = formatRibuan(document.getElementById('in-nominal').value || '0');
+            const admin = formatRibuan(document.getElementById('in-admin').value || '0');
+            const total = document.getElementById('out-total').innerText.replace('Rp', '').trim();
+            const cfg = KONFIGURASI_JENIS[jenisTransaksiAktif] || KONFIGURASI_JENIS.transfer;
+            const line = '-'.repeat(28);
+
+            // WhatsApp memakai * untuk bold dan _ untuk italic pada teks pesan.
+            let msg = `*MUSTAKIM MINI ATM*\n${cfg.judulStruk}\n${line}\n`;
+            msg += `Tanggal: ${get('in-tanggal')}\n`;
+            msg += `No. Ref: ${get('in-ref')}\n${line}\n`;
+
+            msg += `*${cfg.labelPengirim}*\n`;
+            msg += `Nama: ${get('in-pengirim-nama')}\n`;
+            msg += `Rek: ${get('in-pengirim-rek')}\n${line}\n`;
+
+            msg += `*${cfg.labelTujuan}*\n`;
+            msg += `Nama: ${get('in-tujuan-nama')}\n`;
+            msg += `Rek: ${get('in-tujuan-rek')}\n`;
+            msg += `Bank: ${get('in-tujuan-bank')}\n`;
+            if (cfg.showNoPelanggan) {
+                // Ditebalkan (*...*) dan diformat per-4-digit supaya menonjol
+                // dan mudah dibaca, terutama untuk token listrik PLN.
+                msg += `No. Pelanggan/Token: *${formatNoPelangganTampil(get('in-no-pelanggan'))}*\n`;
+            }
+            msg += `${line}\n`;
+
+            msg += `Nominal: Rp ${nominal}\n`;
+            msg += `Admin: Rp ${admin}\n`;
+            msg += `*TOTAL: Rp ${total}*\n${line}\n`;
+            msg += `Transaksi berhasil. Terima kasih telah menggunakan layanan kami.`;
+
+            return msg;
+        }
+
+        function shareKeWhatsApp() {
+            if (!validateBeforePrint()) return; // pastikan nominal terisi sebelum share
+
+            const text = buildReceiptPlainText();
+            const encodedText = encodeURIComponent(text);
+            // wa.me tanpa nomor tujuan -> WhatsApp akan minta user pilih kontak
+            // tujuan sendiri (cocok untuk kasus "share struk", bukan kirim ke
+            // nomor tertentu yang sudah ditentukan di awal).
+            const waUrl = `https://wa.me/?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+        }
+
+        async function loadRiwayat() {
+            const loadingEl = document.getElementById('riwayat-loading');
+            const emptyEl = document.getElementById('riwayat-empty');
+            const listEl = document.getElementById('riwayat-list');
+
+            listEl.innerHTML = '';
+            emptyEl.style.display = 'none';
+            loadingEl.style.display = 'block';
+
+            if (!isApiConfigured()) {
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+                emptyEl.querySelector('p').innerText = 'API belum dikonfigurasi (set API_URL di kode).';
+                return;
+            }
+
+            try {
+                const res = await fetch(API_URL + '?action=riwayat');
+                const result = await res.json();
+                loadingEl.style.display = 'none';
+
+                if (result.status !== 'success' || !result.data || result.data.length === 0) {
+                    emptyEl.style.display = 'block';
+                    return;
+                }
+
+                result.data.forEach(trx => {
+                    const card = document.createElement('div');
+                    card.className = 'riwayat-card';
+                    const jenisLabel = (KONFIGURASI_JENIS[trx.jenis] || KONFIGURASI_JENIS.transfer).judulStruk;
+                    card.innerHTML = `
+                        <div class="riwayat-card-top">
+                            <div>
+                                <span class="riwayat-nominal">Rp ${formatRibuan(trx.total)}</span>
+                                <div style="font-size:10px; color:var(--primary); font-weight:600; text-transform:uppercase; margin-top:2px;">${jenisLabel}</div>
+                            </div>
+                            <span class="riwayat-tanggal">${trx.tanggal || '-'}</span>
+                        </div>
+                        <div class="riwayat-detail">
+                            <div><b>Dari:</b> ${trx.pengirim || '-'}</div>
+                            <div><b>Ke:</b> ${trx.tujuan || '-'} (${trx.bank || '-'})</div>
+                            <div><b>Ref:</b> ${trx.ref || '-'}</div>
+                        </div>
+                    `;
+                    listEl.appendChild(card);
+                });
+            } catch (error) {
+                console.error(error);
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+                emptyEl.querySelector('p').innerText = 'Gagal memuat riwayat. Cek koneksi internet.';
+            }
+        }
+    </script>
 </body>
 </html>
