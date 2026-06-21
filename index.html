@@ -882,7 +882,7 @@
                 } else {
                     // Deteksi umum: ID Pelanggan/No. Pelanggan/Nomor Meter,
                     // dst -- untuk jenis Bayar Tagihan (BPJS, kredit, dll)
-                    const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\s*meter|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
+                    const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\no*token|nomor\s*meter|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
                     if (noPelangganMatch) noPelangganEl.value = noPelangganMatch[1];
                 }
             }
@@ -1244,7 +1244,7 @@
                 const noPelangganFormatted = formatNoPelangganTampil(get('in-no-pelanggan'));
 
                 t += "\x1B\x61\x01"; // Align center
-                t += "No. Pelanggan / Token\n";
+                t += "Nomor Token\n";
                 t += "\x1B\x45\x01"; // Bold on
                 if (noPelangganFormatted.length <= 16) {
                     // Cukup pendek -> aman pakai font besar (double height saja,
@@ -1448,7 +1448,7 @@
             if (cfg.showNoPelanggan) {
                 // Ditebalkan (*...*) dan diformat per-4-digit supaya menonjol
                 // dan mudah dibaca, terutama untuk token listrik PLN.
-                msg += `No. Pelanggan/Token: *${formatNoPelangganTampil(get('in-no-pelanggan'))}*\n`;
+                msg += `Nomor Token: *${formatNoPelangganTampil(get('in-no-pelanggan'))}*\n`;
             }
             msg += `${line}\n`;
 
