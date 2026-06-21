@@ -208,8 +208,8 @@
             <div class="brand-info">
                 <div class="logo-box"><i class="fa-solid fa-receipt"></i></div>
                 <div class="brand-text">
-                    <h1>ATM MINI</h1>
-                    <p>Cetak Struk Transfer</p>
+                    <h1>MUSTAKIM MINI ATM</h1>
+                    <p>Cetak Struk Konter</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -232,11 +232,11 @@
                     <button type="button" class="chip-jenis" data-jenis="ewallet" onclick="pilihJenisTransaksi('ewallet', this)">
                         <i class="fa-solid fa-wallet"></i> Topup E-Wallet
                     </button>
-                    <button type="button" class="chip-jenis" data-jenis="tagihan" onclick="pilihJenisTransaksi('tagihan', this)">
-                        <i class="fa-solid fa-file-invoice"></i> Bayar Tagihan
+                    <button type="button" class="chip-jenis" data-jenis="listrik" onclick="pilihJenisTransaksi('listrik', this)">
+                        <i class="fa-solid fa-file-invoice"></i> Token PLN
                     </button>
-                    <button type="button" class="chip-jenis" data-jenis="lainnya" onclick="pilihJenisTransaksi('lainnya', this)">
-                        <i class="fa-solid fa-ellipsis"></i> Lainnya
+                    <button type="button" class="chip-jenis" data-jenis="tagihan" onclick="pilihJenisTransaksi('tagihan', this)">
+                        <i class="fa-solid fa-ellipsis"></i> Bayar Tagihan
                     </button>
                 </div>
             </div>
@@ -465,25 +465,25 @@
                 labelUploadJudul: 'Upload Bukti Topup E-Wallet',
                 labelUploadSub: 'Foto screenshot bukti topup DANA, OVO, GoPay, ShopeePay, dll',
                 labelPengirim: 'SUMBER DANA', labelPengirimNama: 'Nama Pemilik Rekening', labelPengirimRek: 'Rekening Sumber',
-                labelTujuan: 'TUJUAN TOPUP', labelTujuanNama: 'Nomor HP / ID Akun', labelTujuanRek: 'Nama Pemilik Akun', labelTujuanBank: 'E-Wallet Tujuan',
+                labelTujuan: 'TOPUP E-WALLET', labelTujuanNama: 'Nama Pemilik Akun', labelTujuanRek: 'Nomor HP / ID Akun', labelTujuanBank: 'E-Wallet Tujuan',
                 showNoPelanggan: false,
                 judulStruk: 'BUKTI TOPUP E-WALLET'
             },
-            tagihan: {
-                labelUploadJudul: 'Upload Bukti Bayar Tagihan',
+            listrik: {
+                labelUploadJudul: 'Upload Bukti Token PLN',
                 labelUploadSub: 'Foto screenshot bukti bayar listrik, pulsa, internet, dll',
                 labelPengirim: 'PEMBAYAR', labelPengirimNama: 'Nama Pembayar', labelPengirimRek: 'Rekening/Sumber Dana',
                 labelTujuan: 'LAYANAN', labelTujuanNama: 'Nama Pelanggan', labelTujuanRek: 'Jenis Layanan', labelTujuanBank: 'Penyedia Layanan',
                 showNoPelanggan: true,
                 judulStruk: 'BUKTI PEMBAYARAN'
             },
-            lainnya: {
-                labelUploadJudul: 'Upload Bukti Transaksi',
-                labelUploadSub: 'Foto screenshot bukti transaksi apa pun',
-                labelPengirim: 'PIHAK 1', labelPengirimNama: 'Nama / Keterangan', labelPengirimRek: 'Nomor / Kode',
-                labelTujuan: 'PIHAK 2', labelTujuanNama: 'Nama / Keterangan', labelTujuanRek: 'Nomor / Kode', labelTujuanBank: 'Penyedia / Bank',
-                showNoPelanggan: false,
-                judulStruk: 'BUKTI TRANSAKSI'
+            tagihan: {
+                labelUploadJudul: 'Upload Bukti Bayar Tagihan',
+                labelUploadSub: 'Foto screenshot bukti bayar listrik, BPJS, KREDIT, dll',
+                labelPengirim: 'PEMBAYAR', labelPengirimNama: 'Nama Pembayar', labelPengirimRek: 'Rekening/Sumber Dana',
+                labelTujuan: 'LAYANAN', labelTujuanNama: 'Nama Pelanggan', labelTujuanRek: 'Jenis Layanan', labelTujuanBank: 'Penyedia Layanan',
+                showNoPelanggan: true,
+                judulStruk: 'BUKTI PEMBAYARAN'
             }
         };
 
@@ -797,7 +797,7 @@
             // Deteksi No. Pelanggan / ID (untuk jenis "Bayar Tagihan"): biasanya
             // ditulis sebagai "ID Pelanggan: 123456" atau "No. Pelanggan 123456"
             // atau "Nomor Meter/Token: 123456" di struk PLN/pulsa/internet.
-            const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\s*meter|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
+            const noPelangganMatch = dataText.match(/(?:id\s*pelanggan|no\.?\s*pelanggan|nomor\s*meter|nomor\s*number|nomor\s*token|customer\s*id)[:\s]*([\w\-]{4,})/i);
             const noPelangganEl = document.getElementById('in-no-pelanggan');
             if (noPelangganMatch && noPelangganEl) noPelangganEl.value = noPelangganMatch[1];
 
