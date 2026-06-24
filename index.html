@@ -428,26 +428,72 @@
             return '';
         }
 
-        // Deteksi jumlah kWh dari baris-baris OCR. Dipakai bersama baik saat
-        // parsing (extractDataFromText) maupun saat build struk cetak
-        // (buildReceiptEscPos), supaya logicnya konsisten di satu tempat saja.
+        // ============================================================
+        // PERBAIKAN detectDayaPLN - v2
+        // Masalah versi lama:
+        //  1. Regex \d{1,2} desimal tidak menangkap "134.500000" (6 desimal)
+        //  2. Keyword 'tarif' di "TARIF/DAYA R1 / 2200.00 VA" ikut terpicu
+        //     sehingga angka "1" dari "R1" keambil lebih dulu
+        //
+        // Strategi baru (prioritas atas ke bawah):
+        //  1. Cari baris dengan keyword SPESIFIK: "JML KWH" / "JUMLAH KWH"
+        //     → tangkap angka dengan desimal berapapun, format max 2 desimal
+        //  2. Cari baris "pemakaian" / "usage" (tidak ada di TARIF/DAYA)
+        //  3. Cari baris "kwh" tapi BUKAN baris yang juga ada "tarif/daya/VA"
+        //  4. Fallback: scan angka desimal, skip baris yang mengandung Rp/ID
+        // ============================================================
         function detectDayaPLN(lines) {
+            // Strategi 1: Keyword SPESIFIK "JML KWH" atau "JUMLAH KWH"
+            // Menangani format "134.500000" (banyak desimal dari Shopee, dll)
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i];
-                let lLower = line.toLowerCase();
-                if (/kwh|pemakaian|usage|tarif/i.test(lLower)) {
-                    let m = line.match(/(\d{1,5}([.,]\d{1,2})?)/);
+                if (/jml\.?\s*kwh|jumlah\s*kwh/i.test(line)) {
+                    let m = line.match(/(\d{1,6}(?:[.,]\d+)?)/);
                     if (m) {
                         let val = parseFloat(m[1].replace(',', '.'));
-                        if (val >= 0.1 && val <= 10000) return m[1];
+                        if (val >= 0.1 && val <= 99999) {
+                            // Format max 2 desimal, buang trailing zero
+                            return parseFloat(val.toFixed(2)).toString().replace('.', ',');
+                        }
                     }
                 }
             }
+            // Strategi 2: keyword "pemakaian" atau "usage" (tidak ada di TARIF/DAYA)
             for (let i = 0; i < lines.length; i++) {
-                let m2 = lines[i].match(/\b\d{1,4}([.,]\d{1,2})\b/);
+                let line = lines[i];
+                if (/pemakaian|usage/i.test(line)) {
+                    let m = line.match(/(\d{1,6}(?:[.,]\d+)?)/);
+                    if (m) {
+                        let val = parseFloat(m[1].replace(',', '.'));
+                        if (val >= 0.1 && val <= 99999) {
+                            return parseFloat(val.toFixed(2)).toString().replace('.', ',');
+                        }
+                    }
+                }
+            }
+            // Strategi 3: keyword "kwh" tapi BUKAN baris TARIF/DAYA/VA
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (/kwh/i.test(line) && !/tarif|daya|\bva\b/i.test(line)) {
+                    let m = line.match(/(\d{1,6}(?:[.,]\d+)?)/);
+                    if (m) {
+                        let val = parseFloat(m[1].replace(',', '.'));
+                        if (val >= 0.1 && val <= 99999) {
+                            return parseFloat(val.toFixed(2)).toString().replace('.', ',');
+                        }
+                    }
+                }
+            }
+            // Strategi 4: fallback - scan angka desimal, skip baris Rp/ID panjang
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (/rp|bayar|tagihan|nominal|total|admin|meter|idpel|pesanan|ref/i.test(line)) continue;
+                let m2 = line.match(/(?<!\d)(\d{1,4}[.,]\d{1,6})(?!\d)/);
                 if (m2) {
-                    let val = parseFloat(m2[0].replace(',', '.'));
-                    if (val > 0 && val <= 10000) return m2[0];
+                    let val = parseFloat(m2[1].replace(',', '.'));
+                    if (val > 0.1 && val <= 9999) {
+                        return parseFloat(val.toFixed(2)).toString().replace('.', ',');
+                    }
                 }
             }
             return '';
@@ -515,6 +561,7 @@
                     }
                 }
 
+                // Gunakan fungsi detectDayaPLN yang sudah diperbaiki
                 pDaya = detectDayaPLN(lines);
 
                 let nomMatch = dataText.match(/(?:rp|total|bayar|nominal|stroom)[^\d]*(\d{2,3}[\.\,]\d{3}(?:[\.\,]\d{3})?)/i) ||
@@ -540,6 +587,7 @@
 
                 if (pId) document.getElementById('in-tujuan-nama').value = pId;
                 if (pDaya) {
+                    // pDaya sudah terformat (misal "134,5"), tinggal tambah satuan KWH
                     let dayaFix = pDaya.replace(/kwh/i, '').trim();
                     document.getElementById('in-tujuan-rek').value = dayaFix + ' KWH';
                 }
